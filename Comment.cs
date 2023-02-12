@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Druware.Server.Content.Entities;
 
 namespace Druware.Server.Content
 {
@@ -11,7 +12,7 @@ namespace Druware.Server.Content
         }
 
         public long CommentId { get; set; }
-        public long ArticleId { get; set; }
+        public Guid ArticleId { get; set; }
         public Guid OwnerId { get; set; }
         public string Content { get; set; } = null!;
         public long? ParentId { get; set; }

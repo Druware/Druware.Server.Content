@@ -1,93 +1,134 @@
-﻿using System;
+﻿/* This file is part of the Druware.Server API Library
+ * 
+ * Foobar is free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
+ * 
+ * The Druware.Server API Library is distributed in the hope that it will be 
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General 
+ * Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with 
+ * the Druware.Server API Library. If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Copyright 2019-2023 by:
+ *    Andy 'Dru' Satori @ Satori & Associates, Inc.
+ *    All Rights Reserved
+ */
+
+using System;
 using AutoMapper;
+using Druware.Extensions;
+using Druware.Server;
 using Druware.Server.Content;
 using Druware.Server.Entities;
-using Druware.Server.Results;
+using RESTfulFoundation.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Druware.Server.Content.Entities;
+
+// TODO: Add a search/query function
 
 namespace Druware.Server.Content.Controllers
 {
+    /// <summary>
+    /// The News Controller handles all of the heavy lifting for the Articles
+    /// and News Feed bits. An Article will support being Tagged using the
+    /// generic tag pool from Druwer.Server.
+    /// </summary>
     [Route("api/[controller]")]
-    public class NewsController : ControllerBase
+    public class NewsController : CustomController
     {
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-
         private readonly ApplicationSettings _settings;
+        private readonly ContentContext _context;
 
-        private readonly EntityContext _context;
-
+        /// <summary>
+        /// Constructor, handles the passed in elements and passes them to the
+        /// base CustomController before moving forward.
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="mapper"></param>
+        /// <param name="userManager"></param>
+        /// <param name="signInManager"></param>
+        /// <param name="context"></param>
+        /// <param name="serverContext"></param>
         public NewsController(
             IConfiguration configuration,
             IMapper mapper,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            EntityContext context)
+            ContentContext context,
+            Druware.Server.ServerContext serverContext)
+            : base(configuration, userManager, signInManager, serverContext)
         {
-            _configuration = configuration;
-            _settings = new ApplicationSettings(_configuration);
+            _settings = new ApplicationSettings(Configuration);
             _mapper = mapper;
-            _signInManager = signInManager;
-            _userManager = userManager;
             _context = context;
         }
 
-        private Article? ArticleByPermalinkOrId(string value)
-        {
-            Int32 id;
-            Article? article = null;
-
-            if (Int32.TryParse(value, out id))
-                article = _context.News?.Single(t => t.ArticleId == id);
-
-            if (article == null)
-                article = _context.News?.Single(t => t.Permalink == value);
-
-            return article;
-        }
-
-        // get - get a list of all the article, with count and offset built in
+        /// <summary>
+        /// Get a list of the articles, in descending modified date order,
+        /// limisted to the paramters passed on the QueryString
+        /// </summary>
+        /// <param name="page">Which 0 based page to fetch</param>
+        /// <param name="count">Limit the items per page</param>
+        /// <returns>A ListResult containing the resulting list</returns>
         [HttpGet("")]
-        public IActionResult GetList()
+        public async Task<IActionResult> GetList([FromQuery] int page = 0, [FromQuery] int count = 10)
         {
-            // not relevant to THIS method
-            /*
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            return (_signInManager.IsSignedIn(currentUser)) ?
-                Ok(Result.Ok("")) : Ok(Result.Error(""));
-            */
-            if (_context.News == null) return Ok(Result.Ok("No Data Available")); // think I want to alter this to not need the Ok()
+            // Everyone has access to this method, but we still want to log it
+            await LogRequest();
+
+            if (_context.News == null) return Ok(Result.Ok("No Data Available"));
 
             var total = _context.News?.Count() ?? 0;
             var list = _context.News?
-                .OrderBy(a => a.Posted)
-                .Include(s => s.ArticleTags)
+                .OrderByDescending(a => a.Modified)
+                .Include("ArticleTags.Tag")
                 .TagWithSource("Getting articles")
-                //                .Skip(page * count)
-                //              .Take(count)
+                .Skip(page * count)
+                .Take(count)
                 .ToList();
-            ListResult result = ListResult.Ok(total, 0, 1000, list: list);
+            ListResult result = ListResult.Ok(list!, total, page, count);
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get a discrete News item, either by Id or Permalink
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         [HttpGet("{value}")]
-        public IActionResult Get(string value)
+        public async Task<IActionResult> Get(string value)
         {
-            Article? article = ArticleByPermalinkOrId(value);
+            // Everyone has access to this method, but we still want to log it
+            await LogRequest();
+
+            Article? article = Article.ByPermalinkOrId(_context, value);
             return (article != null) ? Ok(article) : BadRequest("Not Found");
         }
 
-        // post - trigger a password reset
+        /// <summary>
+        /// Add an Article to the News Library
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("")]
+        [Authorize(Roles = NewsSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
         public async Task<ActionResult<Article>> Add(
             [FromBody] Article model)
         {
+            ActionResult? r = await UpdateUserAccess();
+            if (r != null) return r;
+
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Select(x => x.Value.Errors)
@@ -96,40 +137,80 @@ namespace Druware.Server.Content.Controllers
                 var message = "Invalid Model Recieved";
                 foreach (var error in errors)
                     message += String.Format("\n\t{0}", error);
-                return Ok(Results.Result.Error(message));
+                return Ok(Result.Error(message));
             }
 
             if (_context.News == null)
                 return Ok(Result.Ok("No Data Available")); // think I want to alter this to not need the Ok()
 
+            // validate the permalink, a duplicate WILL fail the save
+
+            if (model.Permalink == null)
+            {
+                // convert spaces to _
+                // strip puncutation
+                // urlencode the result
+                model.Permalink = model.Title!
+                    .Replace(" ", "_")
+                    .Replace("!", "")
+                    .Replace(",", "")
+                    .Replace("\"", "")
+                    .Replace("?", "")
+                    .Replace("=", "")
+                    .EncodeUrl();
+            }
+
+            if (!Article.IsPermalinkValid(_context, model.Permalink!))
+                return Ok(Result.Error("Permalink cannot duplicate an existing link"));
+
+            // update the model with some relevant elements.
+
+            // authorId & byLine
+            if (model.AuthorId == null)
+            {
+                User user = await UserManager.GetUserAsync(HttpContext.User);
+                model.AuthorId = new Guid(user.Id);
+                model.ByLine = user.LastName + ", " + user.FirstName;
+            }
+            model.Posted = DateTime.Now;
+            model.Modified = DateTime.Now;
+
+            // tags-
+
+            if (model.Tags != null)
+                foreach (string t in model.Tags)
+                { 
+                    ArticleTag at = new();
+                    at.Article = model;
+                    Tag tag = Tag.ByNameOrId(ServerContext, t);
+                    if (tag.TagId == null)
+                        at.Tag = tag;
+                    else
+                        at.TagId = (long)tag.TagId!;
+                    model.ArticleTags.Add(at);
+                }
+
             _context.News.Add(model);
             await _context.SaveChangesAsync();
-
-            // fix the tags on the model if present, to by
-
-            //foreach (string t in model.Tags)
-            //{
-            //    Tag? tag = _context.Tags?.Single(ta => ta.Name == t);
-            //       
-//
-  //          }
-
-            // convert the Tags array to ArticleTags ( and create any new ones that are missing )
-
-            // tag = _context.Tags?.Single(t => t.Name == value);
-            // return (tag != null) ? Ok(tag) : BadRequest("Not Found");
-
-
             return Ok(model);
         }
 
+        /// <summary>
+        /// Update an existing article within the new library
+        /// </summary>
+        /// <param name="model">The updated article</param>
+        /// <param name="value">The Id or Permalink of the article to update</param>
+        /// <returns></returns>
         [HttpPut("{value}")]
-        public async Task<ActionResult<Article>> Update(
-            string value,
-            [FromBody] Article model)
+        [Authorize(Roles = NewsSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
+        public async Task<ActionResult<Article>> Update(      
+            [FromBody] Article model, string value)
         {
+            ActionResult? r = await UpdateUserAccess();
+            if (r != null) return r;
+
             // find the article
-            Article? article = ArticleByPermalinkOrId(value);
+            Article? article = Article.ByPermalinkOrId(_context, value);
             if (article == null) return BadRequest("Not Found");
 
             // validate the model
@@ -141,7 +222,7 @@ namespace Druware.Server.Content.Controllers
                 var message = "Invalid Model Recieved";
                 foreach (var error in errors)
                     message += String.Format("\n\t{0}", error);
-                return Ok(Results.Result.Error(message));
+                return Ok(Result.Error(message));
             }
 
             // validate the changes on the internal rules.
@@ -149,38 +230,82 @@ namespace Druware.Server.Content.Controllers
             // the postedDate cannot be changed
             // may need to adjust the collections ( tags/comments )
 
+            // validate the permalink, a duplicate WILL fail the save
+
+            if (model.Permalink == null)
+            {
+                // convert spaces to _
+                // strip puncutation
+                // urlencode the result
+                model.Permalink = model.Title!
+                    .Replace(" ", "_")
+                    .Replace("!", "")
+                    .Replace(",", "")
+                    .Replace("\"", "")
+                    .Replace("?", "")
+                    .Replace("=", "")
+                    .EncodeUrl();
+            }
+
+            if (!Article.IsPermalinkValid(_context, model.Permalink!, model.ArticleId))
+                return Ok(Result.Error("Permalink cannot duplicate an existing link"));
+
             // set and write the changes
-
+            // cannot use this because it maps the private values too.
+            // Author and ByLine cannot be altered here
             article.Title = model.Title;
+            article.Summary = model.Summary;
+            article.Body = model.Body;
+            article.Modified = DateTime.Now;
+            article.Pinned = model.Pinned;
+            article.Expires = model.Expires;
+            article.Permalink = model.Permalink;
 
-            // _context.Entry<Article>(article).CurrentValues.SetValues(model);
+            if (article.ArticleTags != null) article.ArticleTags.Clear();
+            if (model.Tags != null && article.ArticleTags != null)
+            { 
+                foreach (string t in model.Tags)
+                {
+                    ArticleTag at = new();
+                    at.ArticleId = article.ArticleId;
+                    Tag tag = Tag.ByNameOrId(ServerContext, t);
+                    if (tag.TagId == null)
+                        at.Tag = tag;
+                    else
+                        at.TagId = (long)tag.TagId!;
+
+                    article.ArticleTags.Add(at);
+                }
+            }
             await _context.SaveChangesAsync();
 
             // return the updated object
-            return Ok(ArticleByPermalinkOrId(value));
+            return Ok(Article.ByPermalinkOrId(_context, value));
         }
 
+        /// <summary>
+        /// Remove an existing Article ( and it's associated children from the
+        /// library.
+        ///
+        /// This action is limited to Editors, or System Administrators
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         [HttpDelete("{value}")]
-        public IActionResult Remove(string value)
+        [Authorize(Roles = NewsSecurityRole.Editor + "," + UserSecurityRole.SystemAdministrator)]
+        public async Task<IActionResult> Remove(string value)
         {
-            // TODO: Add Security/Permissions check
+            ActionResult? r = await UpdateUserAccess();
+            if (r != null) return r;
 
-
-            Article? article = ArticleByPermalinkOrId(value);
+            Article? article = Article.ByPermalinkOrId(_context, value);
             if (article == null) return BadRequest("Not Found");
-
-            // now that we have an entity, we will need to check if it is
-            // referenced from other entities, like artictles, but we are not
-            // there yet.
-            // ... Dru 2022.11.02
 
             _context.News.Remove(article);
             _context.SaveChanges();
 
             // Should rework the save to return a success of fail on the delete
             return Ok(Result.Ok("Delete Successful"));
-
-
         }
 
     }

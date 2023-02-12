@@ -13,7 +13,9 @@
     <None Remove="Microsoft.EntityFrameworkCore.Tools" />
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <None Remove="Models\" />
+    <None Remove="RESTfulFoundation.Server" />
     <None Remove="Entities\" />
+    <None Remove="Entities\Configuration\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
@@ -27,6 +29,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+    <PackageReference Include="RESTfulFoundation.Server" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Druware.Extensions\Druware.Extensions.csproj" />
@@ -35,5 +38,6 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Entities\" />
+    <Folder Include="Entities\Configuration\" />
   </ItemGroup>
 </Project>
