@@ -128,49 +128,6 @@ namespace Druware.Server.Content.Migrations
                     b.ToTable("comment", "content");
                 });
 
-            modelBuilder.Entity("Druware.Server.Content.Document", b =>
-                {
-                    b.Property<long>("DocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("document_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("DocumentId"));
-
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("author_id");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("body");
-
-                    b.Property<DateTime?>("Modified")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("modified");
-
-                    b.Property<string>("Permalink")
-                        .HasColumnType("character varying")
-                        .HasColumnName("permalink");
-
-                    b.Property<DateTime>("Posted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("posted")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("title");
-
-                    b.HasKey("DocumentId");
-
-                    b.ToTable("document", "content");
-                });
-
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
                     b.Property<Guid?>("ArticleId")
@@ -251,6 +208,65 @@ namespace Druware.Server.Content.Migrations
                     b.ToTable("ArticleTag", "content");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.Document", b =>
+                {
+                    b.Property<Guid?>("DocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Permalink")
+                        .HasColumnType("character varying");
+
+                    b.Property<DateTime?>("Posted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("DocumentId");
+
+                    b.HasIndex("Permalink")
+                        .IsUnique();
+
+                    b.ToTable("Document", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.DocumentTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id")
+                        .HasName("document_tag_pkey");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("DocumentTag", "content");
+                });
+
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>
                 {
                     b.Property<long?>("TagId")
@@ -315,6 +331,25 @@ namespace Druware.Server.Content.Migrations
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.DocumentTag", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Document", "Document")
+                        .WithMany("DocumentTags")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .HasConstraintName("fk_documenttags_documentid__document_documentid");
+
+                    b.HasOne("Druware.Server.Entities.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.AssetType", b =>
                 {
                     b.Navigation("Assets");
@@ -330,6 +365,11 @@ namespace Druware.Server.Content.Migrations
                     b.Navigation("ArticleTags");
 
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.Document", b =>
+                {
+                    b.Navigation("DocumentTags");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,4 +7,11 @@ public static class NewsSecurityRole
     public const string AuthorOrEditor = Author + ", " + Editor;
 }
 
+
+public static class DocumentSecurityRole
+{
+    public const string Author = "B187BD0D-13A2-44FC-9C68-4D5B3F01CFCF";
+    public const string Editor = "05E796FB-BD6A-48A0-A879-F7A1984306CA";
+    public const string AuthorOrEditor = Author + ", " + Editor;
+}
 // TODO: Add additional Roles below

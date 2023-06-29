@@ -50,22 +50,21 @@ namespace Druware.Server.Content.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "document",
+                name: "Document",
                 schema: "content",
                 columns: table => new
                 {
-                    document_id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    body = table.Column<string>(type: "text", nullable: false),
-                    author_id = table.Column<long>(type: "bigint", nullable: false),
-                    posted = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
-                    modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    permalink = table.Column<string>(type: "character varying", nullable: true)
+                    DocumentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    Body = table.Column<string>(type: "text", nullable: true),
+                    AuthorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Posted = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "now()"),
+                    Modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Permalink = table.Column<string>(type: "character varying", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_document", x => x.document_id);
+                    table.PrimaryKey("PK_Document", x => x.DocumentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,6 +149,33 @@ namespace Druware.Server.Content.Migrations
                         principalColumn: "ArticleId");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "DocumentTag",
+                schema: "content",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DocumentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TagId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("document_tag_pkey", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentTag_Tag_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tag",
+                        principalColumn: "TagId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_documenttags_documentid__document_documentid",
+                        column: x => x.DocumentId,
+                        principalSchema: "content",
+                        principalTable: "Document",
+                        principalColumn: "DocumentId");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Article_Permalink",
                 schema: "content",
@@ -186,6 +212,25 @@ namespace Druware.Server.Content.Migrations
                 schema: "content",
                 table: "comment",
                 column: "parent_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Document_Permalink",
+                schema: "content",
+                table: "Document",
+                column: "Permalink",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DocumentTag_DocumentId",
+                schema: "content",
+                table: "DocumentTag",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DocumentTag_TagId",
+                schema: "content",
+                table: "DocumentTag",
+                column: "TagId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -203,11 +248,8 @@ namespace Druware.Server.Content.Migrations
                 schema: "content");
 
             migrationBuilder.DropTable(
-                name: "document",
+                name: "DocumentTag",
                 schema: "content");
-
-            migrationBuilder.DropTable(
-                name: "Tag");
 
             migrationBuilder.DropTable(
                 name: "asset_type",
@@ -215,6 +257,10 @@ namespace Druware.Server.Content.Migrations
 
             migrationBuilder.DropTable(
                 name: "Article",
+                schema: "content");
+
+            migrationBuilder.DropTable(
+                name: "Document",
                 schema: "content");
         }
     }

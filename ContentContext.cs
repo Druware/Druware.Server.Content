@@ -38,6 +38,8 @@ namespace Druware.Server.Content
         public virtual DbSet<Comment> Comments { get; set; } = null!;
 
         public virtual DbSet<Document> Documents { get; set; } = null!;
+        public virtual DbSet<DocumentTag> DocumentTags { get; set; } = null!;
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -54,7 +56,8 @@ namespace Druware.Server.Content
         {
             modelBuilder.ApplyConfiguration(new ArticleConfiguration());
             modelBuilder.ApplyConfiguration(new ArticleTagConfiguration());
-
+            modelBuilder.ApplyConfiguration(new DocumentConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentTagConfiguration());
 
             // TODO: Migrate the rest to Configuration design for code clarity
 
@@ -137,34 +140,6 @@ namespace Druware.Server.Content
                     .HasConstraintName("fk_news_comment_parent_id__news_comment_comment_id");
             });
 
-            modelBuilder.Entity<Document>(entity =>
-            {
-                entity.ToTable("document", "content");
-
-                entity.Property(e => e.DocumentId).HasColumnName("document_id");
-
-                entity.Property(e => e.AuthorId).HasColumnName("author_id");
-
-                entity.Property(e => e.Body).HasColumnName("body");
-
-                entity.Property(e => e.Modified)
-                    .HasColumnType("timestamp without time zone")
-                    .HasColumnName("modified");
-
-                entity.Property(e => e.Permalink)
-                    .HasColumnType("character varying")
-                    .HasColumnName("permalink");
-
-                entity.Property(e => e.Posted)
-                    .HasColumnType("timestamp without time zone")
-                    .HasColumnName("posted")
-                    .HasDefaultValueSql("now()");
-
-                entity.Property(e => e.Title)
-                    .HasMaxLength(255)
-                    .HasColumnName("title");
-            });
-
             OnModelCreatingPartial(modelBuilder);
         }
 
@@ -189,6 +164,23 @@ namespace Druware.Server.Content
                             Description = "News Editor",
                             Name = NewsSecurityRole.Editor,
                             NormalizedName = NewsSecurityRole.Editor.ToUpper()
+                        });
+
+                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == DocumentSecurityRole.Author) == null)
+                    context.Roles.Add(
+                        new Role
+                        {
+                            Description = "Document Author",
+                            Name = DocumentSecurityRole.Author,
+                            NormalizedName = DocumentSecurityRole.Author.ToUpper()
+                        });
+                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == DocumentSecurityRole.Editor) == null)
+                    context.Roles.Add(
+                        new Role
+                        {
+                            Description = "Document Editor",
+                            Name = DocumentSecurityRole.Editor,
+                            NormalizedName = DocumentSecurityRole.Editor.ToUpper()
                         });
 
 
