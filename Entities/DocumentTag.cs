@@ -11,6 +11,6 @@ namespace Druware.Server.Content.Entities
         public long TagId { get; set; }
 
         public virtual Document? Document { get; set; } = null;
-        public virtual Druware.Server.Entities.Tag? Tag { get; set; } = null;
+        public virtual Tag? Tag { get; set; } = null;
     }
 }

@@ -36,8 +36,6 @@
     <ProjectReference Include="..\Druware.Server\Druware.Server.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Entities\" />
-    <Folder Include="Entities\Configuration\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

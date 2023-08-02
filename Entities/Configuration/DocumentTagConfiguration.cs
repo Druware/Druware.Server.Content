@@ -11,7 +11,7 @@ namespace Druware.Server.Content.Entities.Configuration
             entity.HasKey(e => e.Id)
                 .HasName("document_tag_pkey");
 
-            entity.ToTable("DocumentTag", "content");
+            entity.ToTable("document_tag", "content");
 
             entity.Property(e => e.Id);
 

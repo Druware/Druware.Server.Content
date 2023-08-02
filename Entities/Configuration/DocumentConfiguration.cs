@@ -9,7 +9,7 @@ namespace Druware.Server.Content.Entities.Configuration
     {
         public void Configure(EntityTypeBuilder<Document> entity)
         {
-            entity.ToTable("Document", "content");
+            entity.ToTable("document", "content");
 
             entity.Property(e => e.DocumentId);
 

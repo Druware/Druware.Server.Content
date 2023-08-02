@@ -8,7 +8,7 @@ namespace Druware.Server.Content.Entities.Configuration
     {
         public void Configure(EntityTypeBuilder<Article> entity)
         {
-            entity.ToTable("Article", "content");
+            entity.ToTable("article", "content");
 
             entity.Property(e => e.ArticleId)
                 .HasDefaultValueSql("gen_random_uuid ()"); // PostgreSQL version
