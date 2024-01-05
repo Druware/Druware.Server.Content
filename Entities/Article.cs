@@ -18,7 +18,6 @@ namespace Druware.Server.Content.Entities
         public Article()
         {
             ArticleTags = new HashSet<ArticleTag>();
-            Comments = new HashSet<Comment>();
         }
 
         public Guid? ArticleId { get; set; }
@@ -26,8 +25,9 @@ namespace Druware.Server.Content.Entities
         public string Summary { get; set; } = null!;
         public string Body { get; set; } = null!;
         public Guid? AuthorId { get; set; }
+        
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime Posted { get; set; }
+        public DateTime? Posted { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime? Modified { get; set; }
         public DateTime? Expires { get; set; }
@@ -37,20 +37,21 @@ namespace Druware.Server.Content.Entities
 
         [JsonIgnore]
         public virtual ICollection<ArticleTag> ArticleTags { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
 
-        private ICollection<string>? _tags = null;
+        private string[]? _tags = null;
         [NotMapped]
-        public ICollection<string>? Tags {
+        public string[]? Tags {
             get
             {
                 if (_tags != null) return _tags;
+                if (ArticleTags == null) return new List<string>().ToArray();
 
                 // otherwise, build the result from the ArticleTags
                 List<string> list = new();
                 foreach (ArticleTag at in ArticleTags)
-                    list.Add(at.Tag!.Name!);
-                return list;
+                    if (at.Tag?.Name != null) list.Add(at.Tag!.Name);
+                _tags = list.ToArray();
+                return _tags;
             }
             set => _tags = value;        
         }

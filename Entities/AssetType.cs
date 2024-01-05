@@ -1,18 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Druware.Server.Content
+﻿namespace Druware.Server.Content.Entities
 {
     public partial class AssetType
     {
-        public AssetType()
+        /*public AssetType()
         {
-            Assets = new HashSet<Asset>();
+        }*/
+
+        public int? TypeId { get; set; } = null;
+        public string? Description { get; set; } = null;
+        public ICollection<Asset>? Assets { get; set; } = null;
+    }
+
+    public partial class AssetType
+    {
+        public static AssetType? ById(
+            ContentContext context,
+            int lookup)
+        {
+            return context.AssetTypes?
+                .SingleOrDefault(t => t.TypeId == lookup);
         }
-
-        public int TypeId { get; set; }
-        public string Description { get; set; } = null!;
-
-        public virtual ICollection<Asset> Assets { get; set; }
     }
 }

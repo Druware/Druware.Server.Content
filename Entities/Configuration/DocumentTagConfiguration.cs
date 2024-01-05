@@ -13,11 +13,14 @@ namespace Druware.Server.Content.Entities.Configuration
 
             entity.ToTable("document_tag", "content");
 
-            entity.Property(e => e.Id);
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
 
-            entity.Property(e => e.DocumentId);
+            entity.Property(e => e.DocumentId)
+                .HasColumnName("document_id");
 
-            entity.Property(e => e.TagId);
+            entity.Property(e => e.TagId)
+                .HasColumnName("tag_id");
 
             entity.HasOne(d => d.Document)
                 .WithMany(p => p.DocumentTags)

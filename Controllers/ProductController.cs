@@ -1,4 +1,4 @@
-﻿/* This file is part of the Druware.Server API Library
+/* This file is part of the Druware.Server API Library
  * 
  * Foobar is free software: you can redistribute it and/or modify it under the 
  * terms of the GNU General Public License as published by the Free Software 
@@ -18,23 +18,17 @@
  *    All Rights Reserved
  */
 
-using System;
 using AutoMapper;
-using Druware.Extensions;
 using Druware.Server;
-using Druware.Server.Content;
 using Druware.Server.Entities;
 using RESTfulFoundation.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
 using Druware.Server.Content.Entities;
-
-// TODO: Add a search/query function
+using System.Linq.Expressions;
 
 namespace Druware.Server.Content.Controllers
 {
@@ -44,7 +38,7 @@ namespace Druware.Server.Content.Controllers
     /// generic tag pool from Druwer.Server.
     /// </summary>
     [Route("api/[controller]")]
-    public class DocumentController : CustomController
+    public class ProductController : CustomController
     {
         private readonly IMapper _mapper;
         private readonly AppSettings _settings;
@@ -60,13 +54,13 @@ namespace Druware.Server.Content.Controllers
         /// <param name="signInManager"></param>
         /// <param name="context"></param>
         /// <param name="serverContext"></param>
-        public DocumentController(
+        public ProductController(
             IConfiguration configuration,
             IMapper mapper,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ContentContext context,
-            Druware.Server.ServerContext serverContext)
+            ServerContext serverContext)
             : base(configuration, userManager, signInManager, serverContext)
         {
             _settings = new AppSettings(Configuration);
@@ -87,18 +81,17 @@ namespace Druware.Server.Content.Controllers
             // Everyone has access to this method, but we still want to log it
             await LogRequest();
 
-            if (_context.News == null) return Ok(Result.Ok("No Data Available"));
+            if (_context.Products == null) return Ok(Result.Ok("No Data Available"));
 
-            var total = _context.Documents?.Count() ?? 0;
-            var list = _context.Documents?
-                .OrderByDescending(a => a.Modified)
-                .Include("DocumentTags.Tag")
-                .TagWithSource("Getting documents")
+            var total = _context.Products?.Count() ?? 0;
+            var list = _context.Products?
+                .OrderBy(a => a.Name)
+                //.Include("Product.Tags")
+                .TagWithSource("Getting Products")
                 .Skip(page * count)
                 .Take(count)
                 .ToList();
-            ListResult result = ListResult.Ok(list!, total, page, count);
-            return Ok(result);
+            return Ok(ListResult.Ok(list!, total, page, count));
         }
 
         /// <summary>
@@ -112,21 +105,79 @@ namespace Druware.Server.Content.Controllers
             // Everyone has access to this method, but we still want to log it
             await LogRequest();
 
-            Document? document = Document.ByPermalinkOrId(_context, value);
-            return (document != null) ? Ok(document) : BadRequest("Not Found");
+            var r = Product.ByShortOrId(_context, value);
+            return (r != null) ? Ok(r) : BadRequest("Not Found");
         }
+        
+        /// <summary>
+        /// Get a discrete News item, either by Id or Permalink
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        [HttpGet("{value}/history")]
+        public async Task<IActionResult> GetHistory(string value)
+        {
+            // Everyone has access to this method, but we still want to log it
+            await LogRequest();
 
+            var r = Product.ByShortOrId(_context, value);
+            var list = (r != null && r.History != null) ? 
+                r.History.ToList()
+                : new List<ProductRelease>();
+            
+            return r is { History: not null } ? 
+                Ok(ListResult.Ok(list, list.Count, 0, list.Count)) : BadRequest("Not Found");
+        }
+        
+        private ListResult? _news = null;
+        
+        [HttpGet("{value}/news")]
+        public async Task<IActionResult> GetNews(string value, 
+            [FromQuery] int page = 0, [FromQuery] int count = 10)
+        {
+            // Everyone has access to this method, but we still want to log it
+            await LogRequest();
+
+            var p = Product.ByShortOrId(_context, value);
+
+            if (p?.Short == null) return BadRequest("Not Found");
+            if (_news != null) return Ok(_news);
+
+            var t = Tag.ByNameOrId( ServerContext, p.Short);
+            if (t.TagId == null) return BadRequest("Not Found");
+            
+            if ( _context.ArticleTags == null ) return  BadRequest("Not Found");
+            
+            var list = _context.News?
+                .AsQueryable()
+                .Where(article =>
+                    _context.ArticleTags!.Any(tag =>
+                        tag.TagId == t.TagId &&
+                        article.ArticleId == tag.ArticleId)
+                )
+                .Include("ArticleTags")
+                .TagWithSource($"Getting articles for tag {p.Short}")
+                .OrderByDescending(e => e.Modified)
+                .Skip(page * count)
+                .Take(count)
+                .ToList();
+            if (list == null) return BadRequest("Not Found");
+            
+            _news = ListResult.Ok(list!, list!.Count, page, count);
+            return Ok(_news);
+        }
+        
         /// <summary>
         /// Add an Article to the News Library
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("")]
-        [Authorize(Roles = DocumentSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
-        public async Task<ActionResult<Document>> Add(
-            [FromBody] Document model)
+        [Authorize(Roles = ProductSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
+        public async Task<ActionResult<Product>> Add(
+            [FromBody] Product model)
         {
-            ActionResult? r = await UpdateUserAccess();
+            var r = await UpdateUserAccess();
             if (r != null) return r;
 
             if (!ModelState.IsValid)
@@ -134,62 +185,39 @@ namespace Druware.Server.Content.Controllers
                 var errors = ModelState.Select(x => x.Value.Errors)
                        .Where(y => y.Count > 0)
                        .ToList();
-                var message = "Invalid Model Recieved";
+                var message = "Invalid Model Received";
                 foreach (var error in errors)
-                    message += String.Format("\n\t{0}", error);
+                    message += $"\n\t{error}";
                 return Ok(Result.Error(message));
             }
 
-            if (_context.Documents == null)
+            if (_context.Products == null)
                 return Ok(Result.Ok("No Data Available")); // think I want to alter this to not need the Ok()
 
             // validate the permalink, a duplicate WILL fail the save
-
-            if (model.Permalink == null)
-            {
-                // convert spaces to _
-                // strip puncutation
-                // urlencode the result
-                model.Permalink = model.Title!
-                    .Replace(" ", "_")
-                    .Replace("!", "")
-                    .Replace(",", "")
-                    .Replace("\"", "")
-                    .Replace("?", "")
-                    .Replace("=", "")
-                    .EncodeUrl();
-            }
-
-            if (!Document.IsPermalinkValid(_context, model.Permalink!))
+            
+            if (!Product.IsShortAvailable(_context, model.Short!))
                 return Ok(Result.Error("Permalink cannot duplicate an existing link"));
 
             // update the model with some relevant elements.
 
-            // authorId & byLine
-            if (model.AuthorId == null)
-            {
-                User user = await UserManager.GetUserAsync(HttpContext.User);
-                model.AuthorId = new Guid(user.Id);
-            }
-            model.Posted = DateTime.Now;
-            model.Modified = DateTime.Now;
 
-            // tags-
-
+            /*
             if (model.Tags != null)
                 foreach (string t in model.Tags)
                 { 
-                    DocumentTag at = new();
-                    at.Document = model;
+                    ProductTag at = new();
+                    at.Product = model;
                     Tag tag = Tag.ByNameOrId(ServerContext, t);
                     if (tag.TagId == null)
                         at.Tag = tag;
                     else
                         at.TagId = (long)tag.TagId!;
-                    model.DocumentTags!.Add(at);
+                    model.ProductTags!.Add(at);
                 }
-
-            _context.Documents.Add(model);
+            */
+            
+            _context.Products.Add(model);
             await _context.SaveChangesAsync();
             return Ok(model);
         }
@@ -201,15 +229,15 @@ namespace Druware.Server.Content.Controllers
         /// <param name="value">The Id or Permalink of the article to update</param>
         /// <returns></returns>
         [HttpPut("{value}")]
-        [Authorize(Roles = DocumentSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
-        public async Task<ActionResult<Document>> Update(      
-            [FromBody] Document model, string value)
+        [Authorize(Roles = ProductSecurityRole.AuthorOrEditor + "," + UserSecurityRole.SystemAdministrator)]
+        public async Task<ActionResult<Product>> Update(      
+            [FromBody] Product model, string value)
         {
             ActionResult? r = await UpdateUserAccess();
             if (r != null) return r;
 
             // find the article
-            Document? document = Document.ByPermalinkOrId(_context, value);
+            Product? document = Product.ByShortOrId(_context, value);
             if (document == null) return BadRequest("Not Found");
 
             // validate the model
@@ -223,32 +251,11 @@ namespace Druware.Server.Content.Controllers
                     message += String.Format("\n\t{0}", error);
                 return Ok(Result.Error(message));
             }
+            
 
-            // validate the changes on the internal rules.
-            // the Id cannot be changed.
-            // the postedDate cannot be changed
-            // may need to adjust the collections ( tags/comments )
-
-            // validate the permalink, a duplicate WILL fail the save
-
-            if (model.Permalink == null)
-            {
-                // convert spaces to _
-                // strip puncutation
-                // urlencode the result
-                model.Permalink = model.Title!
-                    .Replace(" ", "_")
-                    .Replace("!", "")
-                    .Replace(",", "")
-                    .Replace("\"", "")
-                    .Replace("?", "")
-                    .Replace("=", "")
-                    .EncodeUrl();
-            }
-
-            if (!Article.IsPermalinkValid(_context, model.Permalink!, model.DocumentId))
-                return Ok(Result.Error("Permalink cannot duplicate an existing link"));
-
+            if (!Product.IsShortAvailable(_context, model.Short!))
+                return Ok(Result.Error("Short cannot duplicate an existing short"));
+/*
             // set and write the changes
             // cannot use this because it maps the private values too.
             // Author and ByLine cannot be altered here
@@ -257,26 +264,26 @@ namespace Druware.Server.Content.Controllers
             document.Modified = DateTime.Now;
             document.Permalink = model.Permalink;
 
-            if (document.DocumentTags != null) document.DocumentTags.Clear();
-            if (model.Tags != null && document.DocumentTags != null)
+            if (document.ProductTags != null) document.ProductTags.Clear();
+            if (model.Tags != null && document.ProductTags != null)
             { 
                 foreach (string t in model.Tags)
                 {
-                    DocumentTag at = new();
-                    at.DocumentId = document.DocumentId;
+                    ProductTag at = new();
+                    at.ProductId = document.ProductId;
                     Tag tag = Tag.ByNameOrId(ServerContext, t);
                     if (tag.TagId == null)
                         at.Tag = tag;
                     else
                         at.TagId = (long)tag.TagId!;
 
-                    document.DocumentTags.Add(at);
+                    document.ProductTags.Add(at);
                 }
             }
             await _context.SaveChangesAsync();
 
-            // return the updated object
-            return Ok(Article.ByPermalinkOrId(_context, value));
+            // return the updated object*/
+            return Ok(Product.ByShortOrId(_context, value));
         }
 
         /// <summary>
@@ -288,17 +295,17 @@ namespace Druware.Server.Content.Controllers
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpDelete("{value}")]
-        [Authorize(Roles = DocumentSecurityRole.Editor + "," + UserSecurityRole.SystemAdministrator)]
+        [Authorize(Roles = ProductSecurityRole.Editor + "," + UserSecurityRole.SystemAdministrator)]
         public async Task<IActionResult> Remove(string value)
         {
-            ActionResult? r = await UpdateUserAccess();
+           var r = await UpdateUserAccess();
             if (r != null) return r;
 
-            Document? document = Document.ByPermalinkOrId(_context, value);
-            if (document == null) return BadRequest("Not Found");
+            var obj = Product.ByShortOrId(_context, value);
+            if (obj == null) return BadRequest("Not Found");
 
-            _context.Documents.Remove(document);
-            _context.SaveChanges();
+            _context.Products?.Remove(obj);
+            await _context.SaveChangesAsync();
 
             // Should rework the save to return a success of fail on the delete
             return Ok(Result.Ok("Delete Successful"));

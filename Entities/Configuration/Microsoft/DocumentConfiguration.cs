@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Druware.Server.Content.Entities.Configuration
+namespace Druware.Server.Content.Entities.Configuration.Microsoft
 {
 	public class DocumentConfiguration : IEntityTypeConfiguration<Document>
     {
@@ -11,23 +11,30 @@ namespace Druware.Server.Content.Entities.Configuration
         {
             entity.ToTable("document", "content");
 
-            entity.Property(e => e.DocumentId);
+            entity.Property(e => e.DocumentId)
+                .HasColumnName("document_id");
 
-            entity.Property(e => e.AuthorId);
+            entity.Property(e => e.AuthorId)
+                .HasColumnName("author_id");
 
-            entity.Property(e => e.Body);
+            entity.Property(e => e.Body)
+                .HasColumnName("body");
 
             entity.Property(e => e.Modified)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnName("modified")
+                .HasColumnType("datetime");
 
             entity.Property(e => e.Permalink)
-                .HasColumnType("character varying");
+                .HasColumnName("permalink")
+                .HasColumnType("varchar(278)");
 
             entity.Property(e => e.Posted)
-                .HasColumnType("timestamp without time zone")
-                .HasDefaultValueSql("now()");
+                .HasColumnName("posted")
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("getdate()");
 
             entity.Property(e => e.Title)
+                .HasColumnName("title")
                 .HasMaxLength(255);
 
             // configure additional index settings

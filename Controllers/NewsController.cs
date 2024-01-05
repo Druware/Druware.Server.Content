@@ -47,7 +47,7 @@ namespace Druware.Server.Content.Controllers
     public class NewsController : CustomController
     {
         private readonly IMapper _mapper;
-        private readonly ApplicationSettings _settings;
+        private readonly AppSettings _settings;
         private readonly ContentContext _context;
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Druware.Server.Content.Controllers
             Druware.Server.ServerContext serverContext)
             : base(configuration, userManager, signInManager, serverContext)
         {
-            _settings = new ApplicationSettings(Configuration);
+            _settings = new AppSettings(Configuration);
             _mapper = mapper;
             _context = context;
         }

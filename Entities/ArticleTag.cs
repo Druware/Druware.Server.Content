@@ -4,7 +4,7 @@ using Druware.Server.Entities;
 
 namespace Druware.Server.Content.Entities
 {
-    public partial class ArticleTag
+    public class ArticleTag
     {
         public long Id { get; set; }
         public Guid? ArticleId { get; set; }

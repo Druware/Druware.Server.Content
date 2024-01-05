@@ -1,191 +1,221 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Druware.Server.Content.Entities;
+﻿using Druware.Server.Content.Entities;
 using Druware.Server.Content.Entities.Configuration;
 using Druware.Server.Entities;
+using Druware.Server.Entities.Configuration.Microsoft;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
-// NOTE: If you rebuild the migration, you may need to go into the .cs and
-//       remove the Tag clause, as it may try to create the table even though
-//       it already exists
+// NOTE: Migrations should ALWAYS be built with the platform specific Contexts
 
-namespace Druware.Server.Content
+namespace Druware.Server.Content;
+
+public interface IContentContext
 {
-    public partial class ContentContext : DbContext
-    {
-#if DEBUG
-        private const string cs = "Host=localhost;Database=druware;Username=postgres;Password=notforproduction";
-#endif
-
-        public ContentContext()
-        {
-        }
-
-        public ContentContext(DbContextOptions<ContentContext> options)
-            : base(options)
-        {
-        }
-
-        public virtual DbSet<Article> News { get; set; } = null!;
-        public virtual DbSet<ArticleTag> ArticleTags { get; set; } = null!;
-
-        public virtual DbSet<AssetType> AssetTypes { get; set; } = null!;
-        public virtual DbSet<Asset> Assets { get; set; } = null!;
+    public DbSet<Article>? News { get; set; }
+    public DbSet<ArticleTag>? ArticleTags { get; set; }
+    
+    public DbSet<AssetType>? AssetTypes { get; set; }
+    public DbSet<Asset>? Assets { get; set; }
         
-        public virtual DbSet<Comment> Comments { get; set; } = null!;
+    public DbSet<Document>? Documents { get; set; }
+    public DbSet<DocumentTag>? DocumentTags { get; set; }
+    
+    public DbSet<Product>? Products { get; set; }
 
-        public virtual DbSet<Document> Documents { get; set; } = null!;
-        public virtual DbSet<DocumentTag> DocumentTags { get; set; } = null!;
+}
 
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+public class ContentContext : DbContext, IContentContext
+{
+    private readonly IConfiguration? _configuration;
+
+    public ContentContext()
+    {
+    }
+
+    public ContentContext(IConfiguration? configuration) // : base()
+    {
+        _configuration = configuration;
+    }
+
+    public ContentContext(DbContextOptions<ContentContext> options,
+        IConfiguration? configuration)
+        : base(options)
+    {
+        _configuration = configuration;
+    }
+
+    public DbSet<Article>? News { get; set; }
+    public DbSet<ArticleTag>? ArticleTags { get; set; }
+    
+    public DbSet<AssetType>? AssetTypes { get; set; }
+    public DbSet<Asset>? Assets { get; set; }
+        
+    public DbSet<Document>? Documents { get; set; }
+    public DbSet<DocumentTag>? DocumentTags { get; set; }
+
+    public DbSet<Product>? Products { get; set; }
+
+    protected override void OnConfiguring(
+        DbContextOptionsBuilder optionsBuilder)
+    {
+        if (optionsBuilder.IsConfigured) return;
+        if (_configuration == null)
+            throw new Exception(
+                "The ContentContext has tried to create without a configuration");
+        
+        var settings = new AppSettings(_configuration!);
+        switch (settings.DbType)
         {
-#if DEBUG
-            // We *should* never get here, and only in DEBUG mode
-            if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseNpgsql(cs); // this is the default
-#else
-            throw new Exception("No Connection String Provided");
-#endif
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfiguration(new ArticleConfiguration());
-            modelBuilder.ApplyConfiguration(new ArticleTagConfiguration());
-            modelBuilder.ApplyConfiguration(new DocumentConfiguration());
-            modelBuilder.ApplyConfiguration(new DocumentTagConfiguration());
-
-            // TODO: Migrate the rest to Configuration design for code clarity
-
-
-            modelBuilder.Entity<Asset>(entity =>
-            {
-                entity.ToTable("asset", "content");
-
-                entity.Property(e => e.AssetId).HasColumnName("asset_id");
-
-                entity.Property(e => e.Content).HasColumnName("content");
-
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .HasColumnName("description");
-
-                entity.Property(e => e.FileName)
-                    .HasMaxLength(192)
-                    .HasColumnName("file_name");
-
-                entity.Property(e => e.MediaType)
-                    .HasMaxLength(128)
-                    .HasColumnName("media_type");
-
-                entity.Property(e => e.TypeId).HasColumnName("type_id");
-
-                entity.HasOne(d => d.Type)
-                    .WithMany(p => p.Assets)
-                    .HasForeignKey(d => d.TypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_content_asset_type_id__content_asset_type_type_id");
-            });
-
-            modelBuilder.Entity<AssetType>(entity =>
-            {
-                entity.HasKey(e => e.TypeId)
-                    .HasName("asset_type_pkey");
-
-                entity.ToTable("asset_type", "content");
-
-                entity.Property(e => e.TypeId).HasColumnName("type_id");
-
-                entity.Property(e => e.Description)
-                    .HasMaxLength(128)
-                    .HasColumnName("description");
-            });
-
-            modelBuilder.Entity<Comment>(entity =>
-            {
-                entity.ToTable("comment", "content");
-
-                entity.Property(e => e.CommentId).HasColumnName("comment_id");
-
-                entity.Property(e => e.ArticleId).HasColumnName("article_id");
-
-                entity.Property(e => e.Content).HasColumnName("content");
-
-                entity.Property(e => e.Modified)
-                    .HasColumnType("timestamp without time zone")
-                    .HasColumnName("modified");
-
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-
-                entity.Property(e => e.ParentId).HasColumnName("parent_id");
-
-                entity.Property(e => e.Posted)
-                    .HasColumnType("timestamp without time zone")
-                    .HasColumnName("posted")
-                    .HasDefaultValueSql("now()");
-
-                entity.HasOne(d => d.Article)
-                    .WithMany(p => p.Comments)
-                    .HasForeignKey(d => d.ArticleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_news_comment_article_id__news_article_article_id");
-
-                entity.HasOne(d => d.Parent)
-                    .WithMany(p => p.InverseParent)
-                    .HasForeignKey(d => d.ParentId)
-                    .HasConstraintName("fk_news_comment_parent_id__news_comment_comment_id");
-            });
-
-            OnModelCreatingPartial(modelBuilder);
-        }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-        public static void ConfigureSecurityRoles(Druware.Server.ServerContext context)
-        {
-            if (context != null)
-            {
-                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == NewsSecurityRole.Author) == null)
-                    context.Roles.Add(
-                        new Role
-                        {
-                            Description = "News Author",
-                            Name = NewsSecurityRole.Author,
-                            NormalizedName = NewsSecurityRole.Author.ToUpper()
-                        });
-                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == NewsSecurityRole.Editor) == null)
-                    context.Roles.Add(
-                        new Role
-                        {
-                            Description = "News Editor",
-                            Name = NewsSecurityRole.Editor,
-                            NormalizedName = NewsSecurityRole.Editor.ToUpper()
-                        });
-
-                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == DocumentSecurityRole.Author) == null)
-                    context.Roles.Add(
-                        new Role
-                        {
-                            Description = "Document Author",
-                            Name = DocumentSecurityRole.Author,
-                            NormalizedName = DocumentSecurityRole.Author.ToUpper()
-                        });
-                if (context.Roles.FirstOrDefault<IdentityRole<string>>(r => r.Name == DocumentSecurityRole.Editor) == null)
-                    context.Roles.Add(
-                        new Role
-                        {
-                            Description = "Document Editor",
-                            Name = DocumentSecurityRole.Editor,
-                            NormalizedName = DocumentSecurityRole.Editor.ToUpper()
-                        });
-
-
-                context.SaveChanges();
-            }
+            case DbContextType.Microsoft:
+                if (settings.ConnectionString != null)
+                    optionsBuilder.UseSqlServer(settings.ConnectionString);
+                break;
+            case DbContextType.PostgreSql:
+                if (settings.ConnectionString != null)
+                    optionsBuilder.UseNpgsql(settings.ConnectionString);
+                break;
+            default:
+                throw new Exception(
+                    "There is no configuration for this DbType");
         }
     }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.ApplyConfiguration(new AssetTypeConfiguration());
+        builder.ApplyConfiguration(new AssetConfiguration());
+
+        // Though Tag is external, we need to ensure we have the config here too
+        // Without this here, News and Documents fail because they cannot 
+        // resolve the property names to the field names for the FK lookups.
+        builder.ApplyConfiguration(new TagConfiguration());
+
+        var settings = new AppSettings(_configuration!);
+        switch (settings.DbType)
+        {
+            case DbContextType.Microsoft:
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ArticleConfiguration());
+                break;
+            case DbContextType.PostgreSql:
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ArticleConfiguration());
+                break;
+            default:
+                throw new Exception(
+                    "There is no configuration for this DbType");        
+        }
+        builder.ApplyConfiguration(new ArticleTagConfiguration());
+        
+        switch (settings.DbType)
+        {
+            case DbContextType.Microsoft:
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.DocumentConfiguration());
+                break;
+            case DbContextType.PostgreSql:
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.DocumentConfiguration());
+                break;
+            default:
+                throw new Exception(
+                    "There is no configuration for this DbType");        
+        }
+        builder.ApplyConfiguration(new DocumentTagConfiguration());
+        
+        switch (settings.DbType)
+        {
+            case DbContextType.Microsoft:
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductReleaseConfiguration());
+                break;
+            case DbContextType.PostgreSql:
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductReleaseConfiguration());
+                break;
+            default:
+                throw new Exception(
+                    "There is no configuration for this DbType");        
+        }
+    }
+
+    public static void ConfigureSecurityRoles(ServerContext context)
+    {
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == NewsSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "News Author",
+                    Name = NewsSecurityRole.Author,
+                    NormalizedName = NewsSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == NewsSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "News Editor",
+                    Name = NewsSecurityRole.Editor,
+                    NormalizedName = NewsSecurityRole.Editor.ToUpper()
+                });
+
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == DocumentSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Document Author",
+                    Name = DocumentSecurityRole.Author,
+                    NormalizedName = DocumentSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == DocumentSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Document Editor",
+                    Name = DocumentSecurityRole.Editor,
+                    NormalizedName = DocumentSecurityRole.Editor.ToUpper()
+                });
+
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == AssetSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Asset Author",
+                    Name = AssetSecurityRole.Author,
+                    NormalizedName = AssetSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == AssetSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Asset Editor",
+                    Name = AssetSecurityRole.Editor,
+                    NormalizedName = AssetSecurityRole.Editor.ToUpper()
+                });
+        
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == ProductSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Product Author",
+                    Name = ProductSecurityRole.Author,
+                    NormalizedName = ProductSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == ProductSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Product Editor",
+                    Name = ProductSecurityRole.Editor,
+                    NormalizedName = ProductSecurityRole.Editor.ToUpper()
+                });
+
+
+        context.SaveChanges();
+    } 
 }

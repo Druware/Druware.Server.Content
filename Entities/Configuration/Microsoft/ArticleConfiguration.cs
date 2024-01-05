@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Druware.Server.Content.Entities.Configuration
+namespace Druware.Server.Content.Entities.Configuration.Microsoft
 {
 	public class ArticleConfiguration : IEntityTypeConfiguration<Article>
     {
@@ -11,35 +11,46 @@ namespace Druware.Server.Content.Entities.Configuration
             entity.ToTable("article", "content");
 
             entity.Property(e => e.ArticleId)
-                .HasDefaultValueSql("gen_random_uuid ()"); // PostgreSQL version
+                .HasColumnName("article_id")
+                .HasDefaultValueSql("newid()"); // Microsoft version
 
-            entity.Property(e => e.AuthorId);
+            entity.Property(e => e.AuthorId)
+                .HasColumnName("author_id");
 
-            entity.Property(e => e.Body);
+            entity.Property(e => e.Body)
+                .HasColumnName("body");
 
             entity.Property(e => e.ByLine)
+                .HasColumnName("by_line")
                 .HasMaxLength(255);
 
             entity.Property(e => e.Expires)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnName("expires")
+                .HasColumnType("datetime");
 
             entity.Property(e => e.Modified)
-                .HasColumnType("timestamp without time zone")
-                .HasDefaultValueSql("now()");
+                .HasColumnName("modified")
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("getDate()");
 
             entity.Property(e => e.Permalink)
+                .HasColumnName("permalink")
                 .HasMaxLength(255);
 
-            entity.Property(e => e.Pinned);
+            entity.Property(e => e.Pinned)
+                .HasColumnName("pinned");
 
             entity.Property(e => e.Posted)
-                .HasColumnType("timestamp without time zone")
-                .HasDefaultValueSql("now()");
+                .HasColumnName("posted")
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("getDate()");
 
             entity.Property(e => e.Summary)
+                .HasColumnName("summary")
                 .HasMaxLength(2048);
 
             entity.Property(e => e.Title)
+                .HasColumnName("title")
                 .HasMaxLength(255);
 
             // configure additional index settings
