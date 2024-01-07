@@ -36,6 +36,7 @@ namespace Druware.Server.Content.Controllers
     /// and Asset Feed bits. An Article will support being Tagged using the
     /// generic tag pool from Druware.Server.
     /// </summary>
+    [Route("[controller]")]
     [Route("api/[controller]")]
     public class AssetController : CustomController
     {

@@ -33,6 +33,7 @@ namespace Druware.Server.Content.Controllers
     /// the various Druware.Server.* libraries.
     /// </summary>
     [Route("api/[controller]")]
+    [Route("[controller]")]
     public class AssetTypeController : CustomController
     {
         private readonly ContentContext _context;

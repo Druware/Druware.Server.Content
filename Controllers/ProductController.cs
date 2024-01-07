@@ -38,6 +38,7 @@ namespace Druware.Server.Content.Controllers
     /// generic tag pool from Druwer.Server.
     /// </summary>
     [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ProductController : CustomController
     {
         private readonly IMapper _mapper;
@@ -200,25 +201,14 @@ namespace Druware.Server.Content.Controllers
                 return Ok(Result.Error("Permalink cannot duplicate an existing link"));
 
             // update the model with some relevant elements.
-
-
-            /*
-            if (model.Tags != null)
-                foreach (string t in model.Tags)
-                { 
-                    ProductTag at = new();
-                    at.Product = model;
-                    Tag tag = Tag.ByNameOrId(ServerContext, t);
-                    if (tag.TagId == null)
-                        at.Tag = tag;
-                    else
-                        at.TagId = (long)tag.TagId!;
-                    model.ProductTags!.Add(at);
-                }
-            */
-            
             _context.Products.Add(model);
             await _context.SaveChangesAsync();
+            
+            // add a tag to the system that matches the short if it does not 
+            // already exist
+
+            _ = Tag.ByNameOrId(ServerContext, model.Short!);
+            
             return Ok(model);
         }
 

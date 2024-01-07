@@ -44,6 +44,7 @@ namespace Druware.Server.Content.Controllers
     /// generic tag pool from Druwer.Server.
     /// </summary>
     [Route("api/[controller]")]
+    [Route("[controller]")]
     public class DocumentController : CustomController
     {
         private readonly IMapper _mapper;
