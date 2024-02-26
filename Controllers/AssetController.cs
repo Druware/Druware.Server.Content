@@ -108,6 +108,22 @@ namespace Druware.Server.Content.Controllers
             return (r != null) ? File(r.Content,  r.MediaType) 
                 : BadRequest("File Not Found");
         }
+        
+        /// <summary>
+        /// Get a discrete Asset item, either by Id or FileName
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        [HttpGet("{value}/detail")]
+        public async Task<IActionResult?> Detail(string value)
+        {
+            // Everyone has access to this method, but we still want to log it
+            await LogRequest();
+
+            var r = Asset.ByFileNameOrId(_context, value);
+            
+            return (r != null) ? Ok(r) : BadRequest("File Not Found");
+        }
 
         /// <summary>
         /// Add an Article to the Asset Library

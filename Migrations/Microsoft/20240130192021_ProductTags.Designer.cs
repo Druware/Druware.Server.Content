@@ -4,6 +4,7 @@ using Druware.Server.Content;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Druware.Server.Content.Migrations.Microsoft
 {
     [DbContext(typeof(ContentContextMicrosoft))]
-    partial class ContentContextMicrosoftModelSnapshot : ModelSnapshot
+    [Migration("20240130192021_ProductTags")]
+    partial class ProductTags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -29,6 +29,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Druware.Server.Content.Entities;
 using System.Linq.Expressions;
+using Druware.Server.Content.Migrations.PostgreSql;
+using Product = Druware.Server.Content.Entities.Product;
 
 namespace Druware.Server.Content.Controllers
 {
@@ -199,10 +201,27 @@ namespace Druware.Server.Content.Controllers
             
             if (!Product.IsShortAvailable(_context, model.Short!))
                 return Ok(Result.Error("Permalink cannot duplicate an existing link"));
+            
+            if (model.Tags != null)
+                foreach (string t in model.Tags)
+                { 
+                    ProductTag at = new();
+                    at.Product = model;
+                    Tag tag = Tag.ByNameOrId(ServerContext, t);
+                    if (tag.TagId == null)
+                        at.Tag = tag;
+                    else
+                        at.TagId = (long)tag.TagId!;
+                    model.ProductTags.Add(at);
+                }
 
             // update the model with some relevant elements.
             _context.Products.Add(model);
-            await _context.SaveChangesAsync();
+            var i = await _context.SaveChangesAsync();
+            if (i == 0)
+            {
+                return BadRequest("Save Failed");
+            }
             
             // add a tag to the system that matches the short if it does not 
             // already exist
@@ -227,8 +246,8 @@ namespace Druware.Server.Content.Controllers
             if (r != null) return r;
 
             // find the article
-            Product? document = Product.ByShortOrId(_context, value);
-            if (document == null) return BadRequest("Not Found");
+            Product? obj = Product.ByShortOrId(_context, value);
+            if (obj == null) return BadRequest("Not Found");
 
             // validate the model
             if (!ModelState.IsValid)
@@ -241,33 +260,41 @@ namespace Druware.Server.Content.Controllers
                     message += String.Format("\n\t{0}", error);
                 return Ok(Result.Error(message));
             }
-            
 
-            if (!Product.IsShortAvailable(_context, model.Short!))
-                return Ok(Result.Error("Short cannot duplicate an existing short"));
-/*
+            // only handle this if the short has changed
+            if (obj.Short != model.Short)
+            {
+                if (!Product.IsShortAvailable(_context, model.Short!))
+                    return Ok(Result.Error("Short cannot duplicate an existing short"));
+            }
+
             // set and write the changes
             // cannot use this because it maps the private values too.
             // Author and ByLine cannot be altered here
-            document.Title = model.Title;
-            document.Body = model.Body;
-            document.Modified = DateTime.Now;
-            document.Permalink = model.Permalink;
-
-            if (document.ProductTags != null) document.ProductTags.Clear();
-            if (model.Tags != null && document.ProductTags != null)
-            { 
+            obj.Name = model.Name;
+            obj.Short = model.Short;
+            obj.Description = model.Description;
+            obj.License = model.License;
+            obj.Summary = model.Summary;
+            obj.DocumentationUrl = model.DocumentationUrl;
+            obj.DownloadUrl = model.DownloadUrl;
+            obj.IconUrl = model.IconUrl;
+            obj.Updated = DateTime.Now; 
+            
+            if (obj.ProductTags != null) obj.ProductTags.Clear();
+            if (model.Tags != null && obj.ProductTags != null)
+            {
                 foreach (string t in model.Tags)
                 {
                     ProductTag at = new();
-                    at.ProductId = document.ProductId;
+                    at.ProductId = (long)obj.ProductId!;
                     Tag tag = Tag.ByNameOrId(ServerContext, t);
                     if (tag.TagId == null)
                         at.Tag = tag;
                     else
                         at.TagId = (long)tag.TagId!;
 
-                    document.ProductTags.Add(at);
+                    obj.ProductTags.Add(at);
                 }
             }
             await _context.SaveChangesAsync();
@@ -293,7 +320,7 @@ namespace Druware.Server.Content.Controllers
 
             var obj = Product.ByShortOrId(_context, value);
             if (obj == null) return BadRequest("Not Found");
-
+            
             _context.Products?.Remove(obj);
             await _context.SaveChangesAsync();
 

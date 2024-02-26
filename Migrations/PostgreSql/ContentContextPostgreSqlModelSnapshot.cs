@@ -255,7 +255,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("ProductId"));
 
                     b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created")
                         .HasDefaultValueSql("now()");
@@ -299,7 +299,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .HasColumnName("summary");
 
                     b.Property<DateTime?>("Updated")
-                        .ValueGeneratedOnAdd()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated")
                         .HasDefaultValueSql("now()");
@@ -360,6 +360,29 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.HasIndex("ProductId");
 
                     b.ToTable("product_release", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ProductTags");
                 });
 
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>
@@ -443,6 +466,25 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductTag", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Product", "Product")
+                        .WithMany("ProductTags")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Druware.Server.Entities.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
                     b.Navigation("ArticleTags");
@@ -461,6 +503,8 @@ namespace Druware.Server.Content.Migrations.PostgreSql
             modelBuilder.Entity("Druware.Server.Content.Entities.Product", b =>
                 {
                     b.Navigation("History");
+
+                    b.Navigation("ProductTags");
                 });
 #pragma warning restore 612, 618
         }

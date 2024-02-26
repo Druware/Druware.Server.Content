@@ -9,7 +9,7 @@ namespace Druware.Server.Content;
 
 public class ContentContextPostgreSql : DbContext, IContentContext
 {
-        private readonly IConfiguration? _configuration;
+    private readonly IConfiguration? _configuration;
 
     public ContentContextPostgreSql() { }
 
@@ -30,6 +30,7 @@ public class ContentContextPostgreSql : DbContext, IContentContext
     public DbSet<DocumentTag>? DocumentTags { get; set; }
     
     public DbSet<Product>? Products { get; set; }
+    public DbSet<ProductTag>? ProductTags { get; set; }
     
     /// <summary>
     /// Configure the User Context to use the database as defined by the
@@ -51,7 +52,7 @@ public class ContentContextPostgreSql : DbContext, IContentContext
 #if DEBUG
         // this is required to run any migration generation.  By default, we
         // leave it empty, and only populate it for generating migrations.
-        const string cs = "";
+        const string cs = "Host=localhost;Username=postgres;Password=Not4Production!;Database=druware;";
         optionsBuilder.UseNpgsql(cs);
 #endif
 

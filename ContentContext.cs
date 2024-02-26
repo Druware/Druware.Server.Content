@@ -22,6 +22,8 @@ public interface IContentContext
     public DbSet<DocumentTag>? DocumentTags { get; set; }
     
     public DbSet<Product>? Products { get; set; }
+    public DbSet<ProductTag>? ProductTags { get; set; }
+
 
 }
 
@@ -56,6 +58,7 @@ public class ContentContext : DbContext, IContentContext
     public DbSet<DocumentTag>? DocumentTags { get; set; }
 
     public DbSet<Product>? Products { get; set; }
+    public DbSet<ProductTag>? ProductTags { get; set; }
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)
@@ -135,6 +138,7 @@ public class ContentContext : DbContext, IContentContext
                 throw new Exception(
                     "There is no configuration for this DbType");        
         }
+        builder.ApplyConfiguration(new ProductTagConfiguration());
     }
 
     public static void ConfigureSecurityRoles(ServerContext context)
