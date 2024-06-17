@@ -8,7 +8,7 @@
       foundation for a file contents upload and consumption platform.
     </Description>
     <PackageId>Druware.Server.Content</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Dru Satori</Authors>
     <Company>dru@druware.com</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
