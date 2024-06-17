@@ -124,7 +124,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     product_id = table.Column<long>(type: "bigint", nullable: true),
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    body = table.Column<string>(type: "text)", nullable: true),
+                    body = table.Column<string>(type: "text", nullable: true),
                     author_id = table.Column<Guid>(type: "uuid", nullable: true),
                     posted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "now()"),
                     modified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "now()"),
