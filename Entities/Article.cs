@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 
@@ -20,7 +19,7 @@ namespace Druware.Server.Content.Entities
             ArticleTags = new HashSet<ArticleTag>();
         }
 
-        public Guid? ArticleId { get; set; }
+        public Guid? ArticleId { get; set; } = Guid.NewGuid(); // add a default in case the Db does not support ( Sqlite ) 
         public string Title { get; set; } = null!;
         public string Summary { get; set; } = null!;
         public string Body { get; set; } = null!;

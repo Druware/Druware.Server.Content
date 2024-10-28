@@ -79,6 +79,10 @@ public class ContentContext : DbContext, IContentContext
                 if (settings.ConnectionString != null)
                     optionsBuilder.UseNpgsql(settings.ConnectionString);
                 break;
+            case DbContextType.Sqlite:
+                if (settings.ConnectionString != null)
+                    optionsBuilder.UseSqlite(settings.ConnectionString);
+                break;            
             default:
                 throw new Exception(
                     "There is no configuration for this DbType");
@@ -100,9 +104,21 @@ public class ContentContext : DbContext, IContentContext
         {
             case DbContextType.Microsoft:
                 builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ArticleConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.DocumentConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductReleaseConfiguration());
                 break;
             case DbContextType.PostgreSql:
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ArticleConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.DocumentConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductReleaseConfiguration());
+                break;
+            case DbContextType.Sqlite:
+                builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ArticleConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Sqlite.DocumentConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ProductConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ProductReleaseConfiguration());
                 break;
             default:
                 throw new Exception(
@@ -110,34 +126,8 @@ public class ContentContext : DbContext, IContentContext
         }
         builder.ApplyConfiguration(new ArticleTagConfiguration());
         
-        switch (settings.DbType)
-        {
-            case DbContextType.Microsoft:
-                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.DocumentConfiguration());
-                break;
-            case DbContextType.PostgreSql:
-                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.DocumentConfiguration());
-                break;
-            default:
-                throw new Exception(
-                    "There is no configuration for this DbType");        
-        }
         builder.ApplyConfiguration(new DocumentTagConfiguration());
         
-        switch (settings.DbType)
-        {
-            case DbContextType.Microsoft:
-                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductConfiguration());
-                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductReleaseConfiguration());
-                break;
-            case DbContextType.PostgreSql:
-                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductConfiguration());
-                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductReleaseConfiguration());
-                break;
-            default:
-                throw new Exception(
-                    "There is no configuration for this DbType");        
-        }
         builder.ApplyConfiguration(new ProductTagConfiguration());
     }
 

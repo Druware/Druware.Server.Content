@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Druware.Server.Content.Entities;
-using Newtonsoft.Json;
 
 // TODO: The AssetType Foreign Key is not yet implemented.
 
