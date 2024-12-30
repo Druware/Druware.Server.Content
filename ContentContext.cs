@@ -59,6 +59,7 @@ public class ContentContext : DbContext, IContentContext
 
     public DbSet<Product>? Products { get; set; }
     public DbSet<ProductTag>? ProductTags { get; set; }
+    public DbSet<ProductRelease>? ProductReleases { get; set; }
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)

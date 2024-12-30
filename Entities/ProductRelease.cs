@@ -16,3 +16,17 @@ public partial class ProductRelease
 	[JsonIgnore]
 	public Product? Product { get; set; }
 }
+
+public partial class ProductRelease
+{
+	public static ProductRelease? ById(
+		ContentContext context,
+		string? lookup)
+	{
+		ProductRelease? r = null;
+		if (int.TryParse(lookup, out var id))
+			r = context.ProductReleases?
+				.SingleOrDefault(t => t.ReleaseId == id);
+		return r;
+	}
+}
