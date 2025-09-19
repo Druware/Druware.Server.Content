@@ -7,24 +7,15 @@
       A small library that when added to a WebAPI project provides the 
       foundation for a file contents upload and consumption platform.
     </Description>
-    <PackageId>Druware.Server.Content</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.5</Version>
     <Authors>Dru Satori</Authors>
     <Company>dru@druware.com</Company>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/Druware/Druware.Server.Content</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Druware/Druware.Server.Content</RepositoryUrl>
-    <PackageReleaseNotes>CHANGELOG.md</PackageReleaseNotes>
     <Copyright>Copyright 2019-2024 by:
       Andy 'Dru' Satori @ Satori &amp; Associates, Inc.
       All Rights Reserved</Copyright>    
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
-    <None Include="README.md" Pack="true" PackagePath="\"/>
     <None Include="CHANGELOG.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
@@ -41,6 +32,10 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Druware.Extensions" Version="1.0.0" />
+    <PackageReference Include="Druware.Server" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
@@ -48,16 +43,13 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.*">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.*" />
     <PackageReference Include="RESTfulFoundation.Server" Version="1.0.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Druware.Extensions\Druware.Extensions.csproj" />
-    <ProjectReference Include="..\Druware.Server\Druware.Server.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Migrations\Microsoft\" />
