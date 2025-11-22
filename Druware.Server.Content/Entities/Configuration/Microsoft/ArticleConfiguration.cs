@@ -52,10 +52,28 @@ namespace Druware.Server.Content.Entities.Configuration.Microsoft
             entity.Property(e => e.Title)
                 .HasColumnName("title")
                 .HasMaxLength(255);
+            
+            // Version 2.0 Added Properties
+            
+            entity.Property(e => e.HeaderImageId)
+                .HasColumnName("header_image_id");
+            entity.Property(e => e.IconId)
+                .HasColumnName("icon_id");
+            entity.Property(e => e.IsFeatured)
+                .HasColumnName("is_featured");
 
             // configure additional index settings
             entity.HasIndex(u => u.Permalink)
                 .IsUnique();
+            
+            // Version 2.0 Added Relationships
+            
+            entity.HasOne(d => d.HeaderImage)
+                .WithOne()
+                .HasForeignKey<Article>(d => d.HeaderImageId);
+            entity.HasOne(d => d.Icon)
+                .WithOne()
+                .HasForeignKey<Article>(d => d.IconId);
         }
     }
 }

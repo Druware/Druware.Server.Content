@@ -3,49 +3,59 @@ using System;
 using Druware.Server.Content;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Druware.Server.Content.Migrations.Sqlite
+namespace Druware.Server.Content.Migrations.PostgreSql
 {
-    [DbContext(typeof(ContentContextSqlite))]
-    partial class ContentContextSqliteModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ContentContextPostgreSql))]
+    [Migration("20251122140550_article-v2")]
+    partial class articlev2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.20");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.20")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
                     b.Property<long>("AssetId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("asset_id");
 
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AssetId"));
+
                     b.Property<byte[]>("Content")
-                        .HasColumnType("BLOB")
+                        .HasColumnType("bytea")
                         .HasColumnName("content");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("description");
 
                     b.Property<string>("FileName")
                         .HasMaxLength(192)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(192)")
                         .HasColumnName("file_name");
 
                     b.Property<string>("MediaType")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(128)")
                         .HasColumnName("media_type");
 
                     b.Property<int>("TypeId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("integer")
                         .HasColumnName("type_id");
 
                     b.HasKey("AssetId");
@@ -59,77 +69,80 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<Guid?>("ArticleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("article_id");
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("text")
                         .HasColumnName("body");
 
                     b.Property<string>("ByLine")
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("by_line");
 
                     b.Property<DateTime?>("Expires")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("expires");
 
                     b.Property<long?>("HeaderImageId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("header_image_id");
 
                     b.Property<long?>("IconId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("icon_id");
 
                     b.Property<bool>("IsFeatured")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("boolean")
                         .HasColumnName("is_featured");
 
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("modified")
-                        .HasDefaultValueSql("date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Permalink")
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("permalink");
 
                     b.Property<bool>("Pinned")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("boolean")
                         .HasColumnName("pinned");
 
                     b.Property<DateTime?>("Posted")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Summary")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("summary");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
 
                     b.HasKey("ArticleId");
 
-                    b.HasIndex("HeaderImageId");
+                    b.HasIndex("HeaderImageId")
+                        .IsUnique();
 
-                    b.HasIndex("IconId");
+                    b.HasIndex("IconId")
+                        .IsUnique();
 
                     b.HasIndex("Permalink")
                         .IsUnique();
@@ -141,15 +154,17 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
                     b.Property<Guid?>("ArticleId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("article_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("tag_id");
 
                     b.HasKey("Id")
@@ -166,12 +181,14 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<int?>("TypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("integer")
                         .HasColumnName("type_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("TypeId"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(128)")
                         .HasColumnName("description");
 
                     b.HasKey("TypeId")
@@ -184,34 +201,34 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<Guid?>("DocumentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("document_id");
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("text")
                         .HasColumnName("body");
 
                     b.Property<DateTime?>("Modified")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("modified");
 
                     b.Property<string>("Permalink")
-                        .HasColumnType("varchar(278)")
+                        .HasColumnType("character varying")
                         .HasColumnName("permalink");
 
                     b.Property<DateTime?>("Posted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Title")
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
 
                     b.HasKey("DocumentId");
@@ -226,15 +243,17 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
                     b.Property<Guid?>("DocumentId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("document_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("tag_id");
 
                     b.HasKey("Id")
@@ -251,58 +270,60 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<long?>("ProductId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("product_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("ProductId"));
 
                     b.Property<DateTime?>("Created")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created")
-                        .HasDefaultValueSql("date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("DocumentationUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(278)")
                         .HasColumnName("documentation_url");
 
                     b.Property<string>("DownloadUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(278)")
                         .HasColumnName("download_url");
 
                     b.Property<string>("IconUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(278)")
                         .HasColumnName("icon_url");
 
                     b.Property<string>("License")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("text")
                         .HasColumnName("license");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<string>("Short")
                         .HasMaxLength(32)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(32)")
                         .HasColumnName("short");
 
                     b.Property<string>("Summary")
                         .HasMaxLength(2048)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("summary");
 
                     b.Property<DateTime?>("Updated")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated")
-                        .HasDefaultValueSql("date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.HasKey("ProductId");
 
@@ -316,41 +337,43 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<long?>("ReleaseId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("release_id");
 
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("ReleaseId"));
+
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("text)")
                         .HasColumnName("body");
 
                     b.Property<string>("DownloadUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(278)")
                         .HasColumnName("download_url");
 
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("modified")
-                        .HasDefaultValueSql("Date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<DateTime?>("Posted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("Date('now')");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<long?>("ProductId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("product_id");
 
                     b.Property<string>("Title")
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
 
                     b.HasKey("ReleaseId");
@@ -364,37 +387,37 @@ namespace Druware.Server.Content.Migrations.Sqlite
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("product_id");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("tag_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("product_tag_pkey");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("product_tag", "content");
+                    b.ToTable("ProductTags");
                 });
 
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>
                 {
                     b.Property<long?>("TagId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("tag_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("TagId"));
 
                     b.Property<string>("Name")
                         .HasMaxLength(64)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("name");
 
                     b.HasKey("TagId");
@@ -419,12 +442,12 @@ namespace Druware.Server.Content.Migrations.Sqlite
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
                     b.HasOne("Druware.Server.Content.Asset", "HeaderImage")
-                        .WithMany()
-                        .HasForeignKey("HeaderImageId");
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
 
                     b.HasOne("Druware.Server.Content.Asset", "Icon")
-                        .WithMany()
-                        .HasForeignKey("IconId");
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
 
                     b.Navigation("HeaderImage");
 
@@ -484,9 +507,8 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("ProductTags")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_producttags_productid__product_productid");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Druware.Server.Entities.Tag", "Tag")
                         .WithMany()

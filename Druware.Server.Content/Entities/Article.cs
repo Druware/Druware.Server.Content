@@ -33,6 +33,18 @@ namespace Druware.Server.Content.Entities
         public bool Pinned { get; set; }
         public string? Permalink { get; set; }
         public string? ByLine { get; set; }
+        
+        // Version 2.0 Properties
+        
+        public long? HeaderImageId { get; set; }
+        [NotMapped]
+        public Asset? HeaderImage { get; private set; }  
+        
+        public long? IconId { get; set; }
+        [NotMapped]
+        public Asset? Icon { get; private set; }
+        
+        public bool IsFeatured { get; set; } = false;
 
         [JsonIgnore]
         public virtual ICollection<ArticleTag> ArticleTags { get; set; }
@@ -68,11 +80,13 @@ namespace Druware.Server.Content.Entities
             if (Guid.TryParse(permalink, out id))
                 article = context.News?
                     .Include("ArticleTags.Tag")
+                    .Include("HeaderImage")
                     .SingleOrDefault(t => t.ArticleId == id);
 
             if (article == null)
                 article = context.News?
                     .Include("ArticleTags.Tag")
+                    .Include("HeaderImage")
                     .SingleOrDefault(t => t.Permalink == permalink);
 
             return article;

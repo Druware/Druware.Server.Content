@@ -17,10 +17,10 @@ namespace Druware.Server.Content.Migrations.Microsoft
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "8.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -29,7 +29,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("asset_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AssetId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AssetId"));
 
                     b.Property<byte[]>("Content")
                         .HasColumnType("varbinary(max)")
@@ -88,6 +88,18 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("datetime")
                         .HasColumnName("expires");
 
+                    b.Property<long?>("HeaderImageId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("header_image_id");
+
+                    b.Property<long?>("IconId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("icon_id");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_featured");
+
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
@@ -123,6 +135,14 @@ namespace Druware.Server.Content.Migrations.Microsoft
 
                     b.HasKey("ArticleId");
 
+                    b.HasIndex("HeaderImageId")
+                        .IsUnique()
+                        .HasFilter("[header_image_id] IS NOT NULL");
+
+                    b.HasIndex("IconId")
+                        .IsUnique()
+                        .HasFilter("[icon_id] IS NOT NULL");
+
                     b.HasIndex("Permalink")
                         .IsUnique()
                         .HasFilter("[permalink] IS NOT NULL");
@@ -137,7 +157,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<Guid?>("ArticleId")
                         .HasColumnType("uniqueidentifier")
@@ -164,7 +184,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("int")
                         .HasColumnName("type_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("TypeId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("TypeId"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
@@ -227,7 +247,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<Guid?>("DocumentId")
                         .HasColumnType("uniqueidentifier")
@@ -254,7 +274,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("product_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ProductId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ProductId"));
 
                     b.Property<DateTime?>("Created")
                         .ValueGeneratedOnAddOrUpdate()
@@ -322,7 +342,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("release_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ReleaseId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ReleaseId"));
 
                     b.Property<Guid?>("AuthorId")
                         .HasColumnType("uniqueidentifier")
@@ -372,7 +392,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint")
@@ -399,7 +419,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("bigint")
                         .HasColumnName("tag_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("TagId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("TagId"));
 
                     b.Property<string>("Name")
                         .HasMaxLength(64)
@@ -424,6 +444,21 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasConstraintName("fk_content_asset_type_id__content_asset_type_type_id");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Asset", "HeaderImage")
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
+
+                    b.HasOne("Druware.Server.Content.Asset", "Icon")
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
+
+                    b.Navigation("HeaderImage");
+
+                    b.Navigation("Icon");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>

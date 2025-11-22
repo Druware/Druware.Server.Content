@@ -17,7 +17,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "8.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -88,6 +88,18 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("expires");
 
+                    b.Property<long?>("HeaderImageId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("header_image_id");
+
+                    b.Property<long?>("IconId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("icon_id");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_featured");
+
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp without time zone")
@@ -122,6 +134,12 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .HasColumnName("title");
 
                     b.HasKey("ArticleId");
+
+                    b.HasIndex("HeaderImageId")
+                        .IsUnique();
+
+                    b.HasIndex("IconId")
+                        .IsUnique();
 
                     b.HasIndex("Permalink")
                         .IsUnique();
@@ -416,6 +434,21 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .HasConstraintName("fk_content_asset_type_id__content_asset_type_type_id");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Asset", "HeaderImage")
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
+
+                    b.HasOne("Druware.Server.Content.Asset", "Icon")
+                        .WithOne()
+                        .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
+
+                    b.Navigation("HeaderImage");
+
+                    b.Navigation("Icon");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>

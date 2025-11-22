@@ -9,8 +9,8 @@ namespace Druware.Server.Content.Entities
     public partial class Document
     {
         public Guid? DocumentId { get; set; }
-        public string? Title { get; set; } = null!;
-        public string? Body { get; set; } = null!;
+        public string? Title { get; set; }
+        public string? Body { get; set; }
         public Guid? AuthorId { get; set; }
         public DateTime? Posted { get; set; }
         public DateTime? Modified { get; set; }
@@ -18,11 +18,10 @@ namespace Druware.Server.Content.Entities
 
         public Document()
         {
-            DocumentTags = new HashSet<DocumentTag>();
         }
 
         [JsonIgnore]
-        public virtual ICollection<DocumentTag>? DocumentTags { get; set; }
+        public virtual ICollection<DocumentTag>? DocumentTags { get; set; } = new HashSet<DocumentTag>();
 
         private ICollection<string>? _tags = null;
         [NotMapped]
@@ -33,9 +32,12 @@ namespace Druware.Server.Content.Entities
                 if (_tags != null) return _tags;
 
                 // otherwise, build the result from the ArticleTags
-                List<string> list = new();
-                foreach (DocumentTag at in DocumentTags!)
+                List<string> list = [];
+                foreach (var at in DocumentTags!)
+                {
                     list.Add(at.Tag!.Name!);
+                }
+
                 return list;
             }
             set => _tags = value;

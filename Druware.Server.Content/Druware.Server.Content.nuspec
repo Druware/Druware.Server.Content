@@ -1,7 +1,7 @@
 <package >
     <metadata>
         <id>$id$</id>
-        <version>1.1.2</version>
+        <version>1.1.7</version>
         <title>Druware.Server.Content</title>
         <authors>dru@druware.com</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
