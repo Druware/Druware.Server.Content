@@ -455,13 +455,13 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .WithOne()
                         .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
 
-                    b.HasOne("Druware.Server.Content.Asset", "Icon")
+                    b.HasOne("Druware.Server.Content.Asset", "IconImage")
                         .WithOne()
                         .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
 
                     b.Navigation("HeaderImage");
 
-                    b.Navigation("Icon");
+                    b.Navigation("IconImage");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>

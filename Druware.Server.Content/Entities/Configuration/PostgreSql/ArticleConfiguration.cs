@@ -71,7 +71,7 @@ namespace Druware.Server.Content.Entities.Configuration.PostgreSql
             entity.HasOne(d => d.HeaderImage)
                 .WithOne()
                 .HasForeignKey<Article>(d => d.HeaderImageId);
-            entity.HasOne(d => d.Icon)
+            entity.HasOne(d => d.IconImage)
                 .WithOne()
                 .HasForeignKey<Article>(d => d.IconId);
         

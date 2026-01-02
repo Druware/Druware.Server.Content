@@ -70,7 +70,7 @@ namespace Druware.Server.Content.Entities.Configuration.Sqlite
             entity.HasOne(d => d.HeaderImage)
                 .WithMany()
                 .HasForeignKey(d => d.HeaderImageId);
-            entity.HasOne(d => d.Icon)
+            entity.HasOne(d => d.IconImage)
                 .WithMany()
                 .HasForeignKey(d => d.IconId);
         }

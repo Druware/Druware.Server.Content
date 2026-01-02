@@ -42,7 +42,7 @@ namespace Druware.Server.Content.Entities
         
         public long? IconId { get; set; }
         [NotMapped]
-        public Asset? Icon { get; private set; }
+        public Asset? IconImage { get; private set; }
         
         public bool IsFeatured { get; set; } = false;
 
@@ -55,11 +55,10 @@ namespace Druware.Server.Content.Entities
             get
             {
                 if (_tags != null) return _tags;
-                if (ArticleTags == null) return new List<string>().ToArray();
 
                 // otherwise, build the result from the ArticleTags
-                List<string> list = new();
-                foreach (ArticleTag at in ArticleTags)
+                List<string> list = [];
+                foreach (var at in ArticleTags)
                     if (at.Tag?.Name != null) list.Add(at.Tag!.Name);
                 _tags = list.ToArray();
                 return _tags;
@@ -81,13 +80,14 @@ namespace Druware.Server.Content.Entities
                 article = context.News?
                     .Include("ArticleTags.Tag")
                     .Include("HeaderImage")
+                    .Include("IconImage")
                     .SingleOrDefault(t => t.ArticleId == id);
 
-            if (article == null)
-                article = context.News?
-                    .Include("ArticleTags.Tag")
-                    .Include("HeaderImage")
-                    .SingleOrDefault(t => t.Permalink == permalink);
+            article ??= context.News?
+                .Include("ArticleTags.Tag")
+                .Include("HeaderImage")
+                .Include("IconImage")
+                .SingleOrDefault(t => t.Permalink == permalink);
 
             return article;
         }

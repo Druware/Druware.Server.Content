@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 // NOTE: Migrations should ALWAYS be built with the platform specific Contexts
 
 namespace Druware.Server.Content;
-
 public interface IContentContext
 {
     public DbSet<Article>? News { get; set; }
@@ -26,6 +25,7 @@ public interface IContentContext
 
 
 }
+
 
 
 public class ContentContext : DbContext, IContentContext

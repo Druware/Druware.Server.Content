@@ -13,19 +13,22 @@ namespace Druware.Server.Content.Migrations.Microsoft
             migrationBuilder.AddColumn<long>(
                 name: "header_image_id",
                 table: "article",
+                schema: "content",
                 type: "bigint",
                 nullable: true);
                 
             migrationBuilder.AddColumn<long>(
                 name: "icon_id",
                 table: "article",
+                schema: "content",
                 type: "bigint",
                 nullable: true);
             
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AddColumn<bool>(
                 name: "is_featured",
                 table: "article",
-                type: "boolean",
+                schema: "content",
+                type: "bit",
                 nullable: false,
                 defaultValue: false);
 

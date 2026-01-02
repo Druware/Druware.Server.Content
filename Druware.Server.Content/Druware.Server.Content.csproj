@@ -3,17 +3,30 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Package Information -->
+    <PackageId>Druware.Server.Content</PackageId>
+    <Version>1.1.12</Version>
+    <Title>Druware.Server.Content</Title>
+    <PackageTags>net6 net8 webapi</PackageTags>
     <Description>
-      A small library that when added to a WebAPI project provides the 
-      foundation for a file contents upload and consumption platform.
+      The Content namespace contains all of the relevant bits to enable a simple but
+      effective CMS within the context of an application that includes it.
     </Description>
-    <Version>1.0.5</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Druware/Druware.Server.Content</RepositoryUrl>
     <Authors>Dru Satori</Authors>
     <Company>dru@druware.com</Company>
-    <Copyright>Copyright 2019-2024 by:
-      Andy 'Dru' Satori @ Satori &amp; Associates, Inc.
-      All Rights Reserved</Copyright>    
+    <Copyright>Copyright 2019-2026 by:
+      Andy 'Dru' Satori @ Druware Software Designs.
+      All Rights Reserved</Copyright>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PropertyGroup necessary references -->
+    <None Include="..\CHANGE.md" Pack="false" PackagePath="CHANGE.md"/>
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="CHANGELOG.md" Pack="true" PackagePath="\"/>
@@ -32,10 +45,10 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Druware.Extensions" Version="1.0.0" />
-    <PackageReference Include="Druware.Server" Version="1.1.0" />
+    <PackageReference Include="Druware.Extensions" Version="1.1.10" />
+    <PackageReference Include="Druware.Server" Version="1.1.*" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.19" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
@@ -43,7 +56,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.19" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.*">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -55,5 +68,6 @@
     <Folder Include="Migrations\Microsoft\" />
     <Folder Include="Migrations\PostgreSql\" />
     <Folder Include="Migrations\Sqlite\" />
+    <Folder Include="pub\" />
   </ItemGroup>
 </Project>
