@@ -15,7 +15,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.20");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -312,6 +312,38 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.ToTable("product", "content");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductMeta", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Property")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("product_meta_pkey");
+
+                    b.HasIndex("ProductId", "Property")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_meta_product_id_property");
+
+                    b.ToTable("product_meta", "content");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.ProductRelease", b =>
                 {
                     b.Property<long?>("ReleaseId")
@@ -422,13 +454,13 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .WithMany()
                         .HasForeignKey("HeaderImageId");
 
-                    b.HasOne("Druware.Server.Content.Asset", "Icon")
+                    b.HasOne("Druware.Server.Content.Asset", "IconImage")
                         .WithMany()
                         .HasForeignKey("IconId");
 
                     b.Navigation("HeaderImage");
 
-                    b.Navigation("Icon");
+                    b.Navigation("IconImage");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>
@@ -467,6 +499,18 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.Navigation("Document");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductMeta", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Product", "Product")
+                        .WithMany("ProductMeta")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_productmeta_productid__product_productid");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ProductRelease", b =>
@@ -517,6 +561,8 @@ namespace Druware.Server.Content.Migrations.Sqlite
             modelBuilder.Entity("Druware.Server.Content.Entities.Product", b =>
                 {
                     b.Navigation("History");
+
+                    b.Navigation("ProductMeta");
 
                     b.Navigation("ProductTags");
                 });

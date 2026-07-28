@@ -17,7 +17,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.20")
+                .HasAnnotation("ProductVersion", "8.0.29")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -330,6 +330,40 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.ToTable("product", "content");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductMeta", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Property")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("property");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("product_meta_pkey");
+
+                    b.HasIndex("ProductId", "Property")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_meta_product_id_property");
+
+                    b.ToTable("product_meta", "content");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.ProductRelease", b =>
                 {
                     b.Property<long?>("ReleaseId")
@@ -384,23 +418,27 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("tag_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("product_tag_pkey");
 
                     b.HasIndex("ProductId");
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("ProductTags");
+                    b.ToTable("product_tag", "content");
                 });
 
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>
@@ -442,13 +480,13 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                         .WithOne()
                         .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
 
-                    b.HasOne("Druware.Server.Content.Asset", "Icon")
+                    b.HasOne("Druware.Server.Content.Asset", "IconImage")
                         .WithOne()
                         .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
 
                     b.Navigation("HeaderImage");
 
-                    b.Navigation("Icon");
+                    b.Navigation("IconImage");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>
@@ -489,6 +527,18 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.ProductMeta", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Product", "Product")
+                        .WithMany("ProductMeta")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_productmeta_productid__product_productid");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.ProductRelease", b =>
                 {
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
@@ -504,8 +554,9 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("ProductTags")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_producttags_productid__product_productid");
 
                     b.HasOne("Druware.Server.Entities.Tag", "Tag")
                         .WithMany()
@@ -536,6 +587,8 @@ namespace Druware.Server.Content.Migrations.PostgreSql
             modelBuilder.Entity("Druware.Server.Content.Entities.Product", b =>
                 {
                     b.Navigation("History");
+
+                    b.Navigation("ProductMeta");
 
                     b.Navigation("ProductTags");
                 });

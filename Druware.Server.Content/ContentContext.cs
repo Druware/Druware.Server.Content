@@ -22,6 +22,7 @@ public interface IContentContext
     
     public DbSet<Product>? Products { get; set; }
     public DbSet<ProductTag>? ProductTags { get; set; }
+    public DbSet<ProductMeta>? ProductMeta { get; set; }
 
 
 }
@@ -59,6 +60,7 @@ public class ContentContext : DbContext, IContentContext
 
     public DbSet<Product>? Products { get; set; }
     public DbSet<ProductTag>? ProductTags { get; set; }
+    public DbSet<ProductMeta>? ProductMeta { get; set; }
     public DbSet<ProductRelease>? ProductReleases { get; set; }
 
     protected override void OnConfiguring(
@@ -130,6 +132,7 @@ public class ContentContext : DbContext, IContentContext
         builder.ApplyConfiguration(new DocumentTagConfiguration());
         
         builder.ApplyConfiguration(new ProductTagConfiguration());
+        builder.ApplyConfiguration(new ProductMetaConfiguration());
     }
 
     public static void ConfigureSecurityRoles(ServerContext context)

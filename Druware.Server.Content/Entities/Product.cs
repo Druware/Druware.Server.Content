@@ -14,12 +14,14 @@ public partial class Product
     public Product()
     {
         ProductTags = new HashSet<ProductTag>();
+        ProductMeta = new HashSet<ProductMeta>();
     }
 
     private Product(ILazyLoader lazyLoader)
     {
         LazyLoader = lazyLoader;
         ProductTags = new HashSet<ProductTag>();
+        ProductMeta = new HashSet<ProductMeta>();
     }
     
     public long? ProductId { get; set; } = null;
@@ -51,6 +53,9 @@ public partial class Product
     [JsonIgnore]
     public virtual ICollection<ProductTag> ProductTags { get; set; }
 
+    [JsonIgnore]
+    public virtual ICollection<ProductMeta> ProductMeta { get; set; }
+
     private string[]? _tags = null;
     [NotMapped]
     public string[]? Tags {
@@ -67,6 +72,24 @@ public partial class Product
             return _tags;
         }
         set => _tags = value;        
+    }
+
+    private Dictionary<string, string>? _meta = null;
+    [NotMapped]
+    public Dictionary<string, string>? Meta
+    {
+        get
+        {
+            if (_meta != null) return _meta;
+            if (ProductMeta == null) return new Dictionary<string, string>();
+
+            Dictionary<string, string> list = new();
+            foreach (ProductMeta pm in ProductMeta)
+                if (pm.Property != null) list[pm.Property] = pm.Value ?? "";
+            _meta = list;
+            return _meta;
+        }
+        set => _meta = value;
     }
 }
 

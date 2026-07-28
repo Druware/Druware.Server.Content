@@ -3,56 +3,52 @@ using System;
 using Druware.Server.Content;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Druware.Server.Content.Migrations.Microsoft
+namespace Druware.Server.Content.Migrations.Sqlite
 {
-    [DbContext(typeof(ContentContextMicrosoft))]
-    partial class ContentContextMicrosoftModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ContentContextSqlite))]
+    [Migration("20260728190023_ProductMeta")]
+    partial class ProductMeta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.29")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
                     b.Property<long>("AssetId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("asset_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AssetId"));
-
                     b.Property<byte[]>("Content")
-                        .HasColumnType("varbinary(max)")
+                        .HasColumnType("BLOB")
                         .HasColumnName("content");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("description");
 
                     b.Property<string>("FileName")
                         .HasMaxLength(192)
-                        .HasColumnType("nvarchar(192)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("file_name");
 
                     b.Property<string>("MediaType")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("media_type");
 
                     b.Property<int>("TypeId")
-                        .HasColumnType("int")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("type_id");
 
                     b.HasKey("AssetId");
@@ -66,22 +62,21 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<Guid?>("ArticleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("article_id")
-                        .HasDefaultValueSql("newid()");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("article_id");
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("body");
 
                     b.Property<string>("ByLine")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("by_line");
 
                     b.Property<DateTime?>("Expires")
@@ -89,63 +84,58 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnName("expires");
 
                     b.Property<long?>("HeaderImageId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("header_image_id");
 
                     b.Property<long?>("IconId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("icon_id");
 
                     b.Property<bool>("IsFeatured")
-                        .HasColumnType("bit")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("is_featured");
 
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
                         .HasColumnName("modified")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("date('now')");
 
                     b.Property<string>("Permalink")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("permalink");
 
                     b.Property<bool>("Pinned")
-                        .HasColumnType("bit")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("pinned");
 
                     b.Property<DateTime?>("Posted")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("date('now')");
 
                     b.Property<string>("Summary")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("summary");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("title");
 
                     b.HasKey("ArticleId");
 
-                    b.HasIndex("HeaderImageId")
-                        .IsUnique()
-                        .HasFilter("[header_image_id] IS NOT NULL");
+                    b.HasIndex("HeaderImageId");
 
-                    b.HasIndex("IconId")
-                        .IsUnique()
-                        .HasFilter("[icon_id] IS NOT NULL");
+                    b.HasIndex("IconId");
 
                     b.HasIndex("Permalink")
-                        .IsUnique()
-                        .HasFilter("[permalink] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("article", "content");
                 });
@@ -154,17 +144,15 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
                     b.Property<Guid?>("ArticleId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("article_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("tag_id");
 
                     b.HasKey("Id")
@@ -181,14 +169,12 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<int?>("TypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("type_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("TypeId"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("description");
 
                     b.HasKey("TypeId")
@@ -201,15 +187,15 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<Guid?>("DocumentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("document_id");
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("body");
 
                     b.Property<DateTime?>("Modified")
@@ -224,18 +210,17 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValueSql("date('now')");
 
                     b.Property<string>("Title")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("title");
 
                     b.HasKey("DocumentId");
 
                     b.HasIndex("Permalink")
-                        .IsUnique()
-                        .HasFilter("[permalink] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("document", "content");
                 });
@@ -244,17 +229,15 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
                     b.Property<Guid?>("DocumentId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("document_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("tag_id");
 
                     b.HasKey("Id")
@@ -271,66 +254,63 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long?>("ProductId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("product_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ProductId"));
 
                     b.Property<DateTime?>("Created")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
                         .HasColumnName("created")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("date('now')");
 
                     b.Property<string>("Description")
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("description");
 
                     b.Property<string>("DocumentationUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("nvarchar(278)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("documentation_url");
 
                     b.Property<string>("DownloadUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("nvarchar(278)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("download_url");
 
                     b.Property<string>("IconUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("nvarchar(278)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("icon_url");
 
                     b.Property<string>("License")
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("license");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("name");
 
                     b.Property<string>("Short")
                         .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("short");
 
                     b.Property<string>("Summary")
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("summary");
 
                     b.Property<DateTime?>("Updated")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
                         .HasColumnName("updated")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("date('now')");
 
                     b.HasKey("ProductId");
 
                     b.HasIndex("Short")
-                        .IsUnique()
-                        .HasFilter("[short] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("product", "content");
                 });
@@ -339,24 +319,22 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("product_id");
 
                     b.Property<string>("Property")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("property");
 
                     b.Property<string>("Value")
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("value");
 
                     b.HasKey("Id")
@@ -373,43 +351,41 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long?>("ReleaseId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("release_id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ReleaseId"));
-
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("TEXT")
                         .HasColumnName("author_id");
 
                     b.Property<string>("Body")
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("body");
 
                     b.Property<string>("DownloadUrl")
                         .HasMaxLength(278)
-                        .HasColumnType("nvarchar(278)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("download_url");
 
                     b.Property<DateTime?>("Modified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("modified")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("Date('now')");
 
                     b.Property<DateTime?>("Posted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("posted")
-                        .HasDefaultValueSql("getDate()");
+                        .HasDefaultValueSql("Date('now')");
 
                     b.Property<long?>("ProductId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("product_id");
 
                     b.Property<string>("Title")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("title");
 
                     b.HasKey("ReleaseId");
@@ -423,17 +399,15 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("product_id");
 
                     b.Property<long>("TagId")
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("tag_id");
 
                     b.HasKey("Id")
@@ -450,21 +424,18 @@ namespace Druware.Server.Content.Migrations.Microsoft
                 {
                     b.Property<long?>("TagId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("tag_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("TagId"));
 
                     b.Property<string>("Name")
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)")
+                        .HasColumnType("TEXT")
                         .HasColumnName("name");
 
                     b.HasKey("TagId");
 
                     b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[name] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("tag", (string)null);
                 });
@@ -483,12 +454,12 @@ namespace Druware.Server.Content.Migrations.Microsoft
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
                     b.HasOne("Druware.Server.Content.Asset", "HeaderImage")
-                        .WithOne()
-                        .HasForeignKey("Druware.Server.Content.Entities.Article", "HeaderImageId");
+                        .WithMany()
+                        .HasForeignKey("HeaderImageId");
 
                     b.HasOne("Druware.Server.Content.Asset", "IconImage")
-                        .WithOne()
-                        .HasForeignKey("Druware.Server.Content.Entities.Article", "IconId");
+                        .WithMany()
+                        .HasForeignKey("IconId");
 
                     b.Navigation("HeaderImage");
 
