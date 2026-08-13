@@ -15,7 +15,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.30");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -254,6 +254,26 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasColumnName("product_id");
 
+                    b.Property<string>("AppStoreAmazon")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("app_store_amazon");
+
+                    b.Property<string>("AppStoreApple")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("app_store_apple");
+
+                    b.Property<string>("AppStoreGoogle")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("app_store_google");
+
+                    b.Property<string>("AppStoreMs")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("app_store_ms");
+
                     b.Property<DateTime?>("Created")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
@@ -263,6 +283,21 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.Property<string>("Description")
                         .HasColumnType("TEXT")
                         .HasColumnName("description");
+
+                    b.Property<string>("DirectOsx")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_osx");
+
+                    b.Property<string>("DirectWinArm")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_win_arm");
+
+                    b.Property<string>("DirectWinX64")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_win_x64");
 
                     b.Property<string>("DocumentationUrl")
                         .HasMaxLength(278)

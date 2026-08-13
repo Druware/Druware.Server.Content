@@ -1,3 +1,15 @@
+## 2026-08-13
+
+* Added seven download link properties to `Product`, stored as first-class
+  nullable columns alongside the existing `download_url`,
+  `documentation_url`, and `icon_url`: `app_store_apple`, `app_store_ms`,
+  `app_store_google`, `app_store_amazon`, `direct_osx`, `direct_win_arm`,
+  and `direct_win_x64`. All are `string?` with a maximum length of 278,
+  matching the `DownloadUrl` idiom. `DownloadUrl` itself is unchanged.
+  Migrations added for Microsoft, PostgreSql, and Sqlite. These are
+  additive nullable columns, so this is not a breaking change — existing
+  rows and any code that ignores the new properties continue to work.
+
 ## 2026-07-28
 
 * Added a `ProductMeta` entity for attaching arbitrary property/value

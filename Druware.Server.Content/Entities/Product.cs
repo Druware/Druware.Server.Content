@@ -37,6 +37,13 @@ public partial class Product
     public string? DownloadUrl { get; set; } = null;
     public string? DocumentationUrl { get; set; } = null;
     public string? IconUrl { get; set; } = null;
+    public string? AppStoreApple { get; set; } = null;
+    public string? AppStoreMs { get; set; } = null;
+    public string? AppStoreGoogle { get; set; } = null;
+    public string? AppStoreAmazon { get; set; } = null;
+    public string? DirectOsx { get; set; } = null;
+    public string? DirectWinArm { get; set; } = null;
+    public string? DirectWinX64 { get; set; } = null;
 	
     // public ICollection<Asset>? Assets { get; set; } = null;
 

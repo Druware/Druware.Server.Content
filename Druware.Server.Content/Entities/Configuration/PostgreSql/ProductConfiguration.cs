@@ -56,6 +56,34 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("icon_url")
             .HasMaxLength(278);
 
+        entity.Property(e => e.AppStoreApple)
+            .HasColumnName("app_store_apple")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.AppStoreMs)
+            .HasColumnName("app_store_ms")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.AppStoreGoogle)
+            .HasColumnName("app_store_google")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.AppStoreAmazon)
+            .HasColumnName("app_store_amazon")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.DirectOsx)
+            .HasColumnName("direct_osx")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.DirectWinArm)
+            .HasColumnName("direct_win_arm")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.DirectWinX64)
+            .HasColumnName("direct_win_x64")
+            .HasMaxLength(278);
+
         // configure additional index settings
         entity.HasIndex(u => u.Short)
             .IsUnique();
