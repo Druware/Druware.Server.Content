@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = ./README.md
 		LICENSE.txt = ./LICENSE.txt
 		publish.yml = ./.github/workflows/publish.yml
-		build-package-and-publish.sh = ./scripts/build-package-and-publish.sh
-		build-package-and-publish.ps1 = ./scripts/build-package-and-publish.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Druware.Server.Content", "Druware.Server.Content\Druware.Server.Content.csproj", "{F6206851-E36E-4ECF-AD66-3EEECF1BC434}"
