@@ -32,6 +32,9 @@ public class ContentContextPostgreSql : DbContext, IContentContext
     public DbSet<Product>? Products { get; set; }
     public DbSet<ProductTag>? ProductTags { get; set; }
     public DbSet<ProductMeta>? ProductMeta { get; set; }
+
+    public DbSet<Collection>? Collections { get; set; }
+    public DbSet<CollectionProduct>? CollectionProducts { get; set; }
     
     /// <summary>
     /// Configure the User Context to use the database as defined by the
@@ -80,6 +83,9 @@ public class ContentContextPostgreSql : DbContext, IContentContext
         builder.ApplyConfiguration(new ProductReleaseConfiguration());
         builder.ApplyConfiguration(new ProductTagConfiguration());
         builder.ApplyConfiguration(new ProductMetaConfiguration());
+
+        builder.ApplyConfiguration(new CollectionConfiguration());
+        builder.ApplyConfiguration(new CollectionProductConfiguration());
 
     }
 }

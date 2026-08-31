@@ -15,6 +15,7 @@ public partial class Product
     {
         ProductTags = new HashSet<ProductTag>();
         ProductMeta = new HashSet<ProductMeta>();
+        CollectionProducts = new HashSet<CollectionProduct>();
     }
 
     private Product(ILazyLoader lazyLoader)
@@ -22,6 +23,7 @@ public partial class Product
         LazyLoader = lazyLoader;
         ProductTags = new HashSet<ProductTag>();
         ProductMeta = new HashSet<ProductMeta>();
+        CollectionProducts = new HashSet<CollectionProduct>();
     }
     
     public long? ProductId { get; set; } = null;
@@ -63,6 +65,9 @@ public partial class Product
     [JsonIgnore]
     public virtual ICollection<ProductMeta> ProductMeta { get; set; }
 
+    [JsonIgnore]
+    public virtual ICollection<CollectionProduct> CollectionProducts { get; set; }
+
     private string[]? _tags = null;
     [NotMapped]
     public string[]? Tags {
@@ -97,6 +102,23 @@ public partial class Product
             return _meta;
         }
         set => _meta = value;
+    }
+
+    private string[]? _collections = null;
+    [NotMapped]
+    public string[]? Collections {
+        get
+        {
+            if (_collections != null) return _collections;
+            if (CollectionProducts == null) return new List<string>().ToArray();
+
+            // otherwise, build the result from the CollectionProducts
+            List<string> list = new();
+            foreach (CollectionProduct cp in CollectionProducts)
+                if (cp.Collection?.Name != null) list.Add(cp.Collection!.Name);
+            _collections = list.ToArray();
+            return _collections;
+        }
     }
 }
 

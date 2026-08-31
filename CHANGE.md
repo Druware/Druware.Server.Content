@@ -1,3 +1,24 @@
+## 2026-08-31
+
+* Added a `Collection` entity for grouping `Product` entities, mapped to
+  `content.collection` with a unique index on `name` and DB-side
+  `created`/`updated` defaults per provider, matching the `Product`
+  idiom. Membership is carried by an explicit join entity,
+  `CollectionProduct`, mapped to `content.collection_product` with a
+  unique index on `(collection_id, product_id)` so a product cannot be
+  added to the same collection twice, and foreign keys back to both
+  `content.collection` and `content.product`. Grouping is unordered and
+  tag-like. Exposed via a `CollectionProducts` navigation collection on
+  both entities, a `[NotMapped] Products` string array on `Collection`,
+  and a read-only `[NotMapped] Collections` string array on `Product` --
+  membership is managed from the `Collection` side. Unlike
+  `Tag.ByNameOrId`, `Collection.ByNameOrId` does not auto-create a
+  missing row; collections are curated entities with their own CRUD.
+  Added `CollectionSecurityRole` (Author/Editor) and seeded the two
+  roles from `ContentContext.ConfigureSecurityRoles`. Migrations added
+  for Microsoft, PostgreSql, and Sqlite. Everything here is additive, so
+  this is not a breaking change.
+
 ## 2026-08-13
 
 * Added seven download link properties to `Product`, stored as first-class

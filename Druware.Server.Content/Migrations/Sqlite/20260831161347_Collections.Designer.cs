@@ -3,6 +3,7 @@ using System;
 using Druware.Server.Content;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Druware.Server.Content.Migrations.Sqlite
 {
     [DbContext(typeof(ContentContextSqlite))]
-    partial class ContentContextSqliteModelSnapshot : ModelSnapshot
+    [Migration("20260831161347_Collections")]
+    partial class Collections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.30");

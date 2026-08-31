@@ -24,6 +24,9 @@ public interface IContentContext
     public DbSet<ProductTag>? ProductTags { get; set; }
     public DbSet<ProductMeta>? ProductMeta { get; set; }
 
+    public DbSet<Collection>? Collections { get; set; }
+    public DbSet<CollectionProduct>? CollectionProducts { get; set; }
+
 
 }
 
@@ -62,6 +65,9 @@ public class ContentContext : DbContext, IContentContext
     public DbSet<ProductTag>? ProductTags { get; set; }
     public DbSet<ProductMeta>? ProductMeta { get; set; }
     public DbSet<ProductRelease>? ProductReleases { get; set; }
+
+    public DbSet<Collection>? Collections { get; set; }
+    public DbSet<CollectionProduct>? CollectionProducts { get; set; }
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)
@@ -110,18 +116,21 @@ public class ContentContext : DbContext, IContentContext
                 builder.ApplyConfiguration(new Entities.Configuration.Microsoft.DocumentConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.Microsoft.ProductReleaseConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Microsoft.CollectionConfiguration());
                 break;
             case DbContextType.PostgreSql:
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ArticleConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.DocumentConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductReleaseConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.CollectionConfiguration());
                 break;
             case DbContextType.Sqlite:
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ArticleConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.DocumentConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ProductConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ProductReleaseConfiguration());
+                builder.ApplyConfiguration(new Entities.Configuration.Sqlite.CollectionConfiguration());
                 break;
             default:
                 throw new Exception(
@@ -133,6 +142,8 @@ public class ContentContext : DbContext, IContentContext
         
         builder.ApplyConfiguration(new ProductTagConfiguration());
         builder.ApplyConfiguration(new ProductMetaConfiguration());
+
+        builder.ApplyConfiguration(new CollectionProductConfiguration());
     }
 
     public static void ConfigureSecurityRoles(ServerContext context)
@@ -211,6 +222,25 @@ public class ContentContext : DbContext, IContentContext
                     Description = "Product Editor",
                     Name = ProductSecurityRole.Editor,
                     NormalizedName = ProductSecurityRole.Editor.ToUpper()
+                });
+
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == CollectionSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Collection Author",
+                    Name = CollectionSecurityRole.Author,
+                    NormalizedName = CollectionSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == CollectionSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Collection Editor",
+                    Name = CollectionSecurityRole.Editor,
+                    NormalizedName = CollectionSecurityRole.Editor.ToUpper()
                 });
 
 

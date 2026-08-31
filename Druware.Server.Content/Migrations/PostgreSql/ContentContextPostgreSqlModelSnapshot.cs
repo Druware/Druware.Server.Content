@@ -194,6 +194,73 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.ToTable("asset_type", "content");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.Collection", b =>
+                {
+                    b.Property<long?>("CollectionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("collection_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("CollectionId"));
+
+                    b.Property<DateTime?>("Created")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("Updated")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("CollectionId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("collection", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.CollectionProduct", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CollectionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("collection_id");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
+
+                    b.HasKey("Id")
+                        .HasName("collection_product_pkey");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("CollectionId", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_collection_product_collection_id_product_id");
+
+                    b.ToTable("collection_product", "content");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.Document", b =>
                 {
                     b.Property<Guid?>("DocumentId")
@@ -543,6 +610,27 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.CollectionProduct", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Collection", "Collection")
+                        .WithMany("CollectionProducts")
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_collectionproducts_collectionid__collection_collectionid");
+
+                    b.HasOne("Druware.Server.Content.Entities.Product", "Product")
+                        .WithMany("CollectionProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_collectionproducts_productid__product_productid");
+
+                    b.Navigation("Collection");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.DocumentTag", b =>
                 {
                     b.HasOne("Druware.Server.Content.Entities.Document", "Document")
@@ -614,6 +702,11 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.Navigation("Assets");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.Collection", b =>
+                {
+                    b.Navigation("CollectionProducts");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.Document", b =>
                 {
                     b.Navigation("DocumentTags");
@@ -621,6 +714,8 @@ namespace Druware.Server.Content.Migrations.PostgreSql
 
             modelBuilder.Entity("Druware.Server.Content.Entities.Product", b =>
                 {
+                    b.Navigation("CollectionProducts");
+
                     b.Navigation("History");
 
                     b.Navigation("ProductMeta");
