@@ -1,3 +1,12 @@
+## 2026-09-12
+
+* Added four link properties to `Product`, stored as nullable columns
+  alongside the existing direct download links: `direct_gnome`,
+  `direct_kde`, `direct_haiku`, and `repo_github`. All are `string?` with a
+  maximum length of 278, matching the `DownloadUrl` idiom. Migrations added
+  for Microsoft, PostgreSql, and Sqlite. These are additive nullable
+  columns, so this is not a breaking change.
+
 ## 2026-08-31
 
 * Added a `Collection` entity for grouping `Product` entities, mapped to

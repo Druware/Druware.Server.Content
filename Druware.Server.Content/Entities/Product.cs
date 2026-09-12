@@ -46,6 +46,10 @@ public partial class Product
     public string? DirectOsx { get; set; } = null;
     public string? DirectWinArm { get; set; } = null;
     public string? DirectWinX64 { get; set; } = null;
+    public string? DirectGnome { get; set; } = null;
+    public string? DirectKde { get; set; } = null;
+    public string? DirectHaiku { get; set; } = null;
+    public string? RepoGithub { get; set; } = null;
 	
     // public ICollection<Asset>? Assets { get; set; } = null;
 

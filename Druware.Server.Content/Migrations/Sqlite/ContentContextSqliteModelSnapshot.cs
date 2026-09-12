@@ -15,7 +15,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.30");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.31");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -347,6 +347,21 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("description");
 
+                    b.Property<string>("DirectGnome")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_gnome");
+
+                    b.Property<string>("DirectHaiku")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_haiku");
+
+                    b.Property<string>("DirectKde")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("direct_kde");
+
                     b.Property<string>("DirectOsx")
                         .HasMaxLength(278)
                         .HasColumnType("TEXT")
@@ -385,6 +400,11 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasMaxLength(255)
                         .HasColumnType("TEXT")
                         .HasColumnName("name");
+
+                    b.Property<string>("RepoGithub")
+                        .HasMaxLength(278)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("repo_github");
 
                     b.Property<string>("Short")
                         .HasMaxLength(32)

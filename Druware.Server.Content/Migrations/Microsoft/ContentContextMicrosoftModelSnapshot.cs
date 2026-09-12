@@ -17,7 +17,7 @@ namespace Druware.Server.Content.Migrations.Microsoft
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.30")
+                .HasAnnotation("ProductVersion", "8.0.31")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -374,6 +374,21 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasColumnType("varchar(max)")
                         .HasColumnName("description");
 
+                    b.Property<string>("DirectGnome")
+                        .HasMaxLength(278)
+                        .HasColumnType("nvarchar(278)")
+                        .HasColumnName("direct_gnome");
+
+                    b.Property<string>("DirectHaiku")
+                        .HasMaxLength(278)
+                        .HasColumnType("nvarchar(278)")
+                        .HasColumnName("direct_haiku");
+
+                    b.Property<string>("DirectKde")
+                        .HasMaxLength(278)
+                        .HasColumnType("nvarchar(278)")
+                        .HasColumnName("direct_kde");
+
                     b.Property<string>("DirectOsx")
                         .HasMaxLength(278)
                         .HasColumnType("nvarchar(278)")
@@ -412,6 +427,11 @@ namespace Druware.Server.Content.Migrations.Microsoft
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("name");
+
+                    b.Property<string>("RepoGithub")
+                        .HasMaxLength(278)
+                        .HasColumnType("nvarchar(278)")
+                        .HasColumnName("repo_github");
 
                     b.Property<string>("Short")
                         .HasMaxLength(32)

@@ -84,6 +84,22 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("direct_win_x64")
             .HasMaxLength(278);
 
+        entity.Property(e => e.DirectGnome)
+            .HasColumnName("direct_gnome")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.DirectKde)
+            .HasColumnName("direct_kde")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.DirectHaiku)
+            .HasColumnName("direct_haiku")
+            .HasMaxLength(278);
+
+        entity.Property(e => e.RepoGithub)
+            .HasColumnName("repo_github")
+            .HasMaxLength(278);
+
         // configure additional index settings
         entity.HasIndex(u => u.Short)
             .IsUnique();
