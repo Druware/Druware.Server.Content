@@ -19,6 +19,7 @@ public class MigrationTests
         Assert.Empty(context.Database.GetPendingMigrations());
         Assert.Contains(all, m => m.EndsWith("_SiteSettings"));
         Assert.Contains(all, m => m.EndsWith("_ArticleTakesAndMeta"));
+        Assert.Contains(all, m => m.EndsWith("_Reviews"));
     }
 
     [Fact]
