@@ -29,6 +29,11 @@
   Sqlite migration applies to an empty database, `SiteSetting` round
   trips, duplicate keys are rejected, `ByKeyOrId` and the key rules
   behave, and `ConfigureSecurityRoles` is idempotent.
+* From this release the package is published to the Satori feed only,
+  `https://nuget.satori-assoc.com/v3/index.json`, and no longer to
+  nuget.org; the publish workflow's nuget.org push step is removed.
+  Consumers need that feed as a package source to restore 1.3.1 and
+  later.
 
 ## 2026-09-12
 
