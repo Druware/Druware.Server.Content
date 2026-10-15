@@ -38,6 +38,9 @@ public class ContentContextPostgreSql : DbContext, IContentContext
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
 
     public DbSet<SiteSetting>? SiteSettings { get; set; }
+
+    public DbSet<Review>? Reviews { get; set; }
+    public DbSet<ReviewTag>? ReviewTags { get; set; }
     
     /// <summary>
     /// Configure the User Context to use the database as defined by the
@@ -95,6 +98,14 @@ public class ContentContextPostgreSql : DbContext, IContentContext
         // Npgsql maps DateTime to timestamptz, which rejects the local times
         // the controllers write; match the other content timestamps instead
         builder.Entity<SiteSetting>().Property(e => e.Updated)
+            .HasColumnType("timestamp without time zone");
+
+        builder.ApplyConfiguration(new ReviewConfiguration());
+        builder.ApplyConfiguration(new ReviewTagConfiguration());
+        // the same for the review stamps
+        builder.Entity<Review>().Property(e => e.Posted)
+            .HasColumnType("timestamp without time zone");
+        builder.Entity<Review>().Property(e => e.Modified)
             .HasColumnType("timestamp without time zone");
 
     }

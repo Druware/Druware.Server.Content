@@ -40,6 +40,9 @@ public class ContentContextSqlite : DbContext, IContentContext
 
     public DbSet<SiteSetting>? SiteSettings { get; set; }
 
+    public DbSet<Review>? Reviews { get; set; }
+    public DbSet<ReviewTag>? ReviewTags { get; set; }
+
     /// <summary>
     /// Configure the User Context to use the database as defined by the
     /// ApplicationSettings
@@ -94,6 +97,9 @@ public class ContentContextSqlite : DbContext, IContentContext
         builder.ApplyConfiguration(new CollectionProductConfiguration());
 
         builder.ApplyConfiguration(new SiteSettingConfiguration());
+
+        builder.ApplyConfiguration(new ReviewConfiguration());
+        builder.ApplyConfiguration(new ReviewTagConfiguration());
 
         
     }

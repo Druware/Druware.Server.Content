@@ -30,6 +30,9 @@ public interface IContentContext
 
     public DbSet<SiteSetting>? SiteSettings { get; set; }
 
+    public DbSet<Review>? Reviews { get; set; }
+    public DbSet<ReviewTag>? ReviewTags { get; set; }
+
 
 }
 
@@ -74,6 +77,9 @@ public class ContentContext : DbContext, IContentContext
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
 
     public DbSet<SiteSetting>? SiteSettings { get; set; }
+
+    public DbSet<Review>? Reviews { get; set; }
+    public DbSet<ReviewTag>? ReviewTags { get; set; }
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)
@@ -134,6 +140,10 @@ public class ContentContext : DbContext, IContentContext
                 // times the controllers write; match the other content timestamps
                 builder.Entity<SiteSetting>().Property(e => e.Updated)
                     .HasColumnType("timestamp without time zone");
+                builder.Entity<Review>().Property(e => e.Posted)
+                    .HasColumnType("timestamp without time zone");
+                builder.Entity<Review>().Property(e => e.Modified)
+                    .HasColumnType("timestamp without time zone");
                 break;
             case DbContextType.Sqlite:
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ArticleConfiguration());
@@ -157,6 +167,9 @@ public class ContentContext : DbContext, IContentContext
         builder.ApplyConfiguration(new CollectionProductConfiguration());
 
         builder.ApplyConfiguration(new SiteSettingConfiguration());
+
+        builder.ApplyConfiguration(new ReviewConfiguration());
+        builder.ApplyConfiguration(new ReviewTagConfiguration());
     }
 
     public static void ConfigureSecurityRoles(ServerContext context)

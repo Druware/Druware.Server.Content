@@ -613,6 +613,133 @@ namespace Druware.Server.Content.Migrations.Microsoft
                     b.ToTable("product_tag", "content");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.Review", b =>
+                {
+                    b.Property<long?>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("review_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("ReviewId"));
+
+                    b.Property<string>("Body")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("body");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("category");
+
+                    b.Property<int?>("DruScore")
+                        .HasColumnType("int")
+                        .HasColumnName("dru_score");
+
+                    b.Property<string>("DruTake")
+                        .HasMaxLength(280)
+                        .HasColumnType("nvarchar(280)")
+                        .HasColumnName("dru_take");
+
+                    b.Property<int?>("EddieScore")
+                        .HasColumnType("int")
+                        .HasColumnName("eddie_score");
+
+                    b.Property<string>("EddieTake")
+                        .HasMaxLength(280)
+                        .HasColumnType("nvarchar(280)")
+                        .HasColumnName("eddie_take");
+
+                    b.Property<bool>("IsAffiliate")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_affiliate");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_featured");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_published");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified");
+
+                    b.Property<string>("Permalink")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("permalink");
+
+                    b.Property<long?>("PhotoAssetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("photo_asset_id");
+
+                    b.Property<DateTime?>("Posted")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("posted");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("product_name");
+
+                    b.Property<string>("ProductUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("product_url");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)")
+                        .HasColumnName("summary");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
+
+                    b.HasKey("ReviewId")
+                        .HasName("review_pkey");
+
+                    b.HasIndex("Permalink")
+                        .IsUnique()
+                        .HasDatabaseName("ix_review_permalink")
+                        .HasFilter("[permalink] IS NOT NULL");
+
+                    b.HasIndex("PhotoAssetId");
+
+                    b.ToTable("review", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.ReviewTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ReviewId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("review_id");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("tag_id");
+
+                    b.HasKey("Id")
+                        .HasName("review_tag_pkey");
+
+                    b.HasIndex("ReviewId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("review_tag", "content");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.SiteSetting", b =>
                 {
                     b.Property<long?>("SettingId")
@@ -813,6 +940,36 @@ namespace Druware.Server.Content.Migrations.Microsoft
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.Review", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Asset", null)
+                        .WithMany()
+                        .HasForeignKey("PhotoAssetId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_review_photoassetid__asset_assetid");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.ReviewTag", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Review", "Review")
+                        .WithMany("ReviewTags")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_reviewtags_reviewid__review_reviewid");
+
+                    b.HasOne("Druware.Server.Entities.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_reviewtags_tagid__tag_tagid");
+
+                    b.Navigation("Review");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
                     b.Navigation("ArticleMeta");
@@ -844,6 +1001,11 @@ namespace Druware.Server.Content.Migrations.Microsoft
                     b.Navigation("ProductMeta");
 
                     b.Navigation("ProductTags");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.Review", b =>
+                {
+                    b.Navigation("ReviewTags");
                 });
 #pragma warning restore 612, 618
         }
