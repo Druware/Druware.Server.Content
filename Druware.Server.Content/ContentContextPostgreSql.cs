@@ -35,6 +35,8 @@ public class ContentContextPostgreSql : DbContext, IContentContext
 
     public DbSet<Collection>? Collections { get; set; }
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
+
+    public DbSet<SiteSetting>? SiteSettings { get; set; }
     
     /// <summary>
     /// Configure the User Context to use the database as defined by the
@@ -86,6 +88,12 @@ public class ContentContextPostgreSql : DbContext, IContentContext
 
         builder.ApplyConfiguration(new CollectionConfiguration());
         builder.ApplyConfiguration(new CollectionProductConfiguration());
+
+        builder.ApplyConfiguration(new SiteSettingConfiguration());
+        // Npgsql maps DateTime to timestamptz, which rejects the local times
+        // the controllers write; match the other content timestamps instead
+        builder.Entity<SiteSetting>().Property(e => e.Updated)
+            .HasColumnType("timestamp without time zone");
 
     }
 }

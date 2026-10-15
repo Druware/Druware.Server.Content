@@ -17,7 +17,7 @@ namespace Druware.Server.Content.Migrations.PostgreSql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.31")
+                .HasAnnotation("ProductVersion", "8.0.32")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -561,6 +561,44 @@ namespace Druware.Server.Content.Migrations.PostgreSql
                     b.HasIndex("TagId");
 
                     b.ToTable("product_tag", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.SiteSetting", b =>
+                {
+                    b.Property<long?>("SettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("setting_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("SettingId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("setting_key");
+
+                    b.Property<DateTime>("Updated")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text")
+                        .HasColumnName("value");
+
+                    b.HasKey("SettingId")
+                        .HasName("site_setting_pkey");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_site_setting_setting_key");
+
+                    b.ToTable("site_setting", "content");
                 });
 
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>

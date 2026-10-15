@@ -38,6 +38,13 @@ public static class CollectionSecurityRole
     public const string Editor = "F4BDC029-F3A4-44DE-8D1C-6728312ADBAD";
     public const string AuthorOrEditor = Author + ", " + Editor;
 }
+
+public static class SiteContentSecurityRole
+{
+    public const string Author = "B97F4340-0ECF-4C45-BAC9-2FC4A9E7586C";
+    public const string Editor = "EE40DD89-9845-423E-AB96-AA5DCD94193C";
+    public const string AuthorOrEditor = Author + ", " + Editor;
+}
 // TODO: Add additional Roles below
 
 // NOTE: Role

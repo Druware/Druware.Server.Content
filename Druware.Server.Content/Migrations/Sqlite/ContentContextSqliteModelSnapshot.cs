@@ -15,7 +15,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.31");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.32");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -533,6 +533,42 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasIndex("TagId");
 
                     b.ToTable("product_tag", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.SiteSetting", b =>
+                {
+                    b.Property<long?>("SettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("setting_id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("setting_key");
+
+                    b.Property<DateTime>("Updated")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("value");
+
+                    b.HasKey("SettingId")
+                        .HasName("site_setting_pkey");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_site_setting_setting_key");
+
+                    b.ToTable("site_setting", "content");
                 });
 
             modelBuilder.Entity("Druware.Server.Entities.Tag", b =>

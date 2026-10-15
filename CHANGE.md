@@ -1,3 +1,35 @@
+## 2026-10-15
+
+* Version 1.3.1, a minor move from the 1.2 line.
+* Added a `SiteSetting` entity for site-wide key/value settings (links,
+  list names, pointers to documents), mapped to `content.site_setting`
+  with a `bigint` identity key `setting_id`, a required `setting_key` of
+  at most 128 characters with a unique index, an unbounded `value`, an
+  optional `description` of at most 512 characters and a required
+  `updated` stamp that callers set on every write. Adding a setting is a
+  new row, not a schema change. The library seeds no settings and
+  defines no endpoint; the entity carries scalars only, so it serialises
+  without `$id`/`$ref` wrappers. Values are meant to be publicly
+  readable, so never store secrets in it. `SiteSetting.ByKeyOrId`
+  looks a row up by id or exact key, and `SiteSetting.IsValidKey` and
+  `SiteSetting.Validate` hold the key and length rules (a key starts
+  with a letter and is letters, digits and dots with no empty segments)
+  so controllers stay thin. The mapping is one provider-neutral
+  `SiteSettingConfiguration`; PostgreSQL alone overrides `updated` to
+  `timestamp without time zone`, matching the other content timestamps.
+  Migrations added for Microsoft, PostgreSql, and Sqlite. This is
+  additive, so not a breaking change.
+* Added `SiteContentSecurityRole` (Author/Editor), one pair for the
+  site-content family of entities, and seeded the two roles ("Site
+  Content Author", "Site Content Editor") from
+  `ContentContext.ConfigureSecurityRoles`.
+* Added the `UnitTests` xUnit project to the solution and re-enabled
+  the Test step in the publish workflow, so a failing test now blocks
+  publishing. The tests run against an in-memory Sqlite database: every
+  Sqlite migration applies to an empty database, `SiteSetting` round
+  trips, duplicate keys are rejected, `ByKeyOrId` and the key rules
+  behave, and `ConfigureSecurityRoles` is idempotent.
+
 ## 2026-09-12
 
 * Added four link properties to `Product`, stored as nullable columns

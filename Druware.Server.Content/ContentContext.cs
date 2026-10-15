@@ -27,6 +27,8 @@ public interface IContentContext
     public DbSet<Collection>? Collections { get; set; }
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
 
+    public DbSet<SiteSetting>? SiteSettings { get; set; }
+
 
 }
 
@@ -68,6 +70,8 @@ public class ContentContext : DbContext, IContentContext
 
     public DbSet<Collection>? Collections { get; set; }
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
+
+    public DbSet<SiteSetting>? SiteSettings { get; set; }
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)
@@ -124,6 +128,10 @@ public class ContentContext : DbContext, IContentContext
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.ProductReleaseConfiguration());
                 builder.ApplyConfiguration(new Entities.Configuration.PostgreSql.CollectionConfiguration());
+                // Npgsql maps DateTime to timestamptz, which rejects the local
+                // times the controllers write; match the other content timestamps
+                builder.Entity<SiteSetting>().Property(e => e.Updated)
+                    .HasColumnType("timestamp without time zone");
                 break;
             case DbContextType.Sqlite:
                 builder.ApplyConfiguration(new Entities.Configuration.Sqlite.ArticleConfiguration());
@@ -144,6 +152,8 @@ public class ContentContext : DbContext, IContentContext
         builder.ApplyConfiguration(new ProductMetaConfiguration());
 
         builder.ApplyConfiguration(new CollectionProductConfiguration());
+
+        builder.ApplyConfiguration(new SiteSettingConfiguration());
     }
 
     public static void ConfigureSecurityRoles(ServerContext context)
@@ -241,6 +251,25 @@ public class ContentContext : DbContext, IContentContext
                     Description = "Collection Editor",
                     Name = CollectionSecurityRole.Editor,
                     NormalizedName = CollectionSecurityRole.Editor.ToUpper()
+                });
+
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == SiteContentSecurityRole.Author) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Site Content Author",
+                    Name = SiteContentSecurityRole.Author,
+                    NormalizedName = SiteContentSecurityRole.Author.ToUpper()
+                });
+        if (context.Roles.FirstOrDefault<IdentityRole<string>>(r =>
+                r.Name == SiteContentSecurityRole.Editor) == null)
+            context.Roles.Add(
+                new Role
+                {
+                    Description = "Site Content Editor",
+                    Name = SiteContentSecurityRole.Editor,
+                    NormalizedName = SiteContentSecurityRole.Editor.ToUpper()
                 });
 
 

@@ -37,6 +37,8 @@ public class ContentContextMicrosoft : DbContext, IContentContext
     public DbSet<Collection>? Collections { get; set; }
     public DbSet<CollectionProduct>? CollectionProducts { get; set; }
 
+    public DbSet<SiteSetting>? SiteSettings { get; set; }
+
     /// <summary>
     /// Configure the User Context to use the database as defined by the
     /// ApplicationSettings
@@ -88,6 +90,8 @@ public class ContentContextMicrosoft : DbContext, IContentContext
 
         builder.ApplyConfiguration(new CollectionConfiguration());
         builder.ApplyConfiguration(new CollectionProductConfiguration());
+
+        builder.ApplyConfiguration(new SiteSettingConfiguration());
 
         
     }
