@@ -76,6 +76,16 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("by_line");
 
+                    b.Property<string>("DruTake")
+                        .HasMaxLength(280)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("dru_take");
+
+                    b.Property<string>("EddieTake")
+                        .HasMaxLength(280)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("eddie_take");
+
                     b.Property<DateTime?>("Expires")
                         .HasColumnType("datetime")
                         .HasColumnName("expires");
@@ -135,6 +145,38 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .IsUnique();
 
                     b.ToTable("article", "content");
+                });
+
+            modelBuilder.Entity("Druware.Server.Content.Entities.ArticleMeta", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("article_id");
+
+                    b.Property<string>("Property")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("article_meta_pkey");
+
+                    b.HasIndex("ArticleId", "Property")
+                        .IsUnique()
+                        .HasDatabaseName("ix_article_meta_article_id_property");
+
+                    b.ToTable("article_meta", "content");
                 });
 
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>
@@ -617,6 +659,18 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.Navigation("IconImage");
                 });
 
+            modelBuilder.Entity("Druware.Server.Content.Entities.ArticleMeta", b =>
+                {
+                    b.HasOne("Druware.Server.Content.Entities.Article", "Article")
+                        .WithMany("ArticleMeta")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_articlemeta_articleid__article_articleid");
+
+                    b.Navigation("Article");
+                });
+
             modelBuilder.Entity("Druware.Server.Content.Entities.ArticleTag", b =>
                 {
                     b.HasOne("Druware.Server.Content.Entities.Article", "Article")
@@ -720,6 +774,8 @@ namespace Druware.Server.Content.Migrations.Sqlite
 
             modelBuilder.Entity("Druware.Server.Content.Entities.Article", b =>
                 {
+                    b.Navigation("ArticleMeta");
+
                     b.Navigation("ArticleTags");
                 });
 

@@ -18,6 +18,7 @@ public class MigrationTests
         Assert.Equal(all, context.Database.GetAppliedMigrations());
         Assert.Empty(context.Database.GetPendingMigrations());
         Assert.Contains(all, m => m.EndsWith("_SiteSettings"));
+        Assert.Contains(all, m => m.EndsWith("_ArticleTakesAndMeta"));
     }
 
     [Fact]
@@ -25,6 +26,28 @@ public class MigrationTests
     {
         using var database = new SqliteDatabase();
         using var context = database.CreateContentContext();
+
+        Assert.False(context.Database.HasPendingModelChanges());
+    }
+
+    // building a model needs no server, so the SQL Server and PostgreSQL
+    // snapshots can be checked against their models here too
+    [Fact]
+    public void MicrosoftModelHasNoChangesMissingFromTheMigrations()
+    {
+        using var context = new ContentContextMicrosoft(
+            new DbContextOptionsBuilder<ContentContextMicrosoft>()
+                .UseSqlServer("Server=unused").Options, null);
+
+        Assert.False(context.Database.HasPendingModelChanges());
+    }
+
+    [Fact]
+    public void PostgreSqlModelHasNoChangesMissingFromTheMigrations()
+    {
+        using var context = new ContentContextPostgreSql(
+            new DbContextOptionsBuilder<ContentContextPostgreSql>()
+                .UseNpgsql("Host=localhost;Database=unused").Options, null);
 
         Assert.False(context.Database.HasPendingModelChanges());
     }

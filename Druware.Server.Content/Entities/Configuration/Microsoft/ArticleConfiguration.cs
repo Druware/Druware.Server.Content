@@ -62,6 +62,15 @@ namespace Druware.Server.Content.Entities.Configuration.Microsoft
             entity.Property(e => e.IsFeatured)
                 .HasColumnName("is_featured");
 
+            // Two takes, optional and nullable
+            
+            entity.Property(e => e.EddieTake)
+                .HasColumnName("eddie_take")
+                .HasMaxLength(Article.TakeMaxLength);
+            entity.Property(e => e.DruTake)
+                .HasColumnName("dru_take")
+                .HasMaxLength(Article.TakeMaxLength);
+
             // configure additional index settings
             entity.HasIndex(u => u.Permalink)
                 .IsUnique();

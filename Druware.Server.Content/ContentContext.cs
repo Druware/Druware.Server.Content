@@ -13,6 +13,7 @@ public interface IContentContext
 {
     public DbSet<Article>? News { get; set; }
     public DbSet<ArticleTag>? ArticleTags { get; set; }
+    public DbSet<ArticleMeta>? ArticleMeta { get; set; }
     
     public DbSet<AssetType>? AssetTypes { get; set; }
     public DbSet<Asset>? Assets { get; set; }
@@ -56,6 +57,7 @@ public class ContentContext : DbContext, IContentContext
 
     public DbSet<Article>? News { get; set; }
     public DbSet<ArticleTag>? ArticleTags { get; set; }
+    public DbSet<ArticleMeta>? ArticleMeta { get; set; }
     
     public DbSet<AssetType>? AssetTypes { get; set; }
     public DbSet<Asset>? Assets { get; set; }
@@ -145,6 +147,7 @@ public class ContentContext : DbContext, IContentContext
                     "There is no configuration for this DbType");        
         }
         builder.ApplyConfiguration(new ArticleTagConfiguration());
+        builder.ApplyConfiguration(new ArticleMetaConfiguration());
         
         builder.ApplyConfiguration(new DocumentTagConfiguration());
         

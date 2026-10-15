@@ -22,6 +22,7 @@ public class ContentContextPostgreSql : DbContext, IContentContext
     
     public DbSet<Article>? News { get; set; }
     public DbSet<ArticleTag>? ArticleTags { get; set; }
+    public DbSet<ArticleMeta>? ArticleMeta { get; set; }
     
     public DbSet<AssetType>? AssetTypes { get; set; }
     public DbSet<Asset>? Assets { get; set; }
@@ -77,6 +78,7 @@ public class ContentContextPostgreSql : DbContext, IContentContext
 
         builder.ApplyConfiguration(new ArticleConfiguration());
         builder.ApplyConfiguration(new ArticleTagConfiguration());
+        builder.ApplyConfiguration(new ArticleMetaConfiguration());
         
         builder.ApplyConfiguration(new DocumentConfiguration());
         builder.ApplyConfiguration(new DocumentTagConfiguration());
