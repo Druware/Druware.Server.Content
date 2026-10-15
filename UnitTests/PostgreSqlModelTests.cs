@@ -43,4 +43,21 @@ public class PostgreSqlModelTests
 
         Assert.Equal(WithoutTimeZone, UpdatedColumnType(context));
     }
+
+    // Reading the provider name runs OnConfiguring without connecting.
+    [Fact]
+    public void MigrationContextBuiltFromConfigurationUsesNpgsql()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["API:Database:ConnectionType"] = "PostgreSql",
+                ["API:Database:ConnectionString"] = NoServer
+            })
+            .Build();
+        using var context = new ContentContextPostgreSql(configuration);
+
+        Assert.Equal("Npgsql.EntityFrameworkCore.PostgreSQL",
+            context.Database.ProviderName);
+    }
 }

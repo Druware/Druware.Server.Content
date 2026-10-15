@@ -52,7 +52,7 @@ public class ContentContextPostgreSql : DbContext, IContentContext
         {
             var settings = new AppSettings(_configuration!);
             if (settings.ConnectionString != null)
-                optionsBuilder.UseSqlServer(settings.ConnectionString);
+                optionsBuilder.UseNpgsql(settings.ConnectionString);
             return;
         }
 
