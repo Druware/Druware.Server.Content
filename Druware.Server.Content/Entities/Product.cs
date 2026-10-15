@@ -91,6 +91,11 @@ public partial class Product
     }
 
     private Dictionary<string, string>? _meta = null;
+
+    // whatever was last assigned to Meta, normally by a request body; kept
+    // apart from _meta because the getter caches its projection there
+    private Dictionary<string, string>? _submittedMeta = null;
+
     [NotMapped]
     public Dictionary<string, string>? Meta
     {
@@ -105,8 +110,17 @@ public partial class Product
             _meta = list;
             return _meta;
         }
-        set => _meta = value;
+        set => _meta = _submittedMeta = value;
     }
+
+    /// <summary>
+    /// The meta a request body carried, or null when it omitted meta or
+    /// sent null. Meta itself never reads as null, because it falls back
+    /// to the rows, and reading it does not change this, so this is how a
+    /// controller tells "leave the meta alone" from "replace it".
+    /// </summary>
+    [JsonIgnore, NotMapped]
+    public Dictionary<string, string>? SubmittedMeta => _submittedMeta;
 
     private string[]? _collections = null;
     [NotMapped]
