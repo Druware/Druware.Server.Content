@@ -15,7 +15,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.32");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.33");
 
             modelBuilder.Entity("Druware.Server.Content.Asset", b =>
                 {
@@ -434,6 +434,10 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("icon_url");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_disabled");
+
                     b.Property<string>("License")
                         .HasColumnType("TEXT")
                         .HasColumnName("license");
@@ -442,6 +446,11 @@ namespace Druware.Server.Content.Migrations.Sqlite
                         .HasMaxLength(255)
                         .HasColumnType("TEXT")
                         .HasColumnName("name");
+
+                    b.Property<string>("RedirectTo")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("redirect_to");
 
                     b.Property<string>("RepoGithub")
                         .HasMaxLength(278)
@@ -824,7 +833,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("CollectionProducts")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_collectionproducts_productid__product_productid");
 
@@ -857,7 +866,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("ProductMeta")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_productmeta_productid__product_productid");
 
@@ -869,6 +878,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("History")
                         .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_content_product_release_product_id__content_product_product_id");
 
                     b.Navigation("Product");
@@ -879,7 +889,7 @@ namespace Druware.Server.Content.Migrations.Sqlite
                     b.HasOne("Druware.Server.Content.Entities.Product", "Product")
                         .WithMany("ProductTags")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_producttags_productid__product_productid");
 

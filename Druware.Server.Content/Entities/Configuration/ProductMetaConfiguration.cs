@@ -30,7 +30,7 @@ public class ProductMetaConfiguration : IEntityTypeConfiguration<ProductMeta>
         entity.HasOne(d => d.Product)
             .WithMany(p => p.ProductMeta)
             .HasForeignKey(d => d.ProductId)
-            .OnDelete(DeleteBehavior.ClientCascade)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("fk_productmeta_productid__product_productid");
 
         entity.HasIndex(e => new { e.ProductId, e.Property })

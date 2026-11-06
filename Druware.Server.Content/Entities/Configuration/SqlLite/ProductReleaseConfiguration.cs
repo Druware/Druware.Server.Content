@@ -45,7 +45,7 @@ public class ProductReleaseConfiguration : IEntityTypeConfiguration<ProductRelea
         entity.HasOne(d => d.Product)
             .WithMany(p => p.History)
             .HasForeignKey(d => d.ProductId)
-            .OnDelete(DeleteBehavior.ClientSetNull)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName(
                 "fk_content_product_release_product_id__content_product_product_id");
     }

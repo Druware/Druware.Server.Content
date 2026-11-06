@@ -174,7 +174,8 @@ public class ProductSubmittedMetaTests
             "appStoreApple":null,"appStoreMs":null,"appStoreGoogle":null,
             "appStoreAmazon":null,"directOsx":null,"directWinArm":null,
             "directWinX64":null,"directGnome":null,"directKde":null,
-            "directHaiku":null,"repoGithub":null,"tags":[],
+            "directHaiku":null,"repoGithub":null,"isDisabled":false,
+            "redirectTo":null,"redirectShort":null,"tags":[],
             "meta":{"description":""},"collections":[]}
             """.ReplaceLineEndings(""),
             JsonSerializer.Serialize(product, Web));
