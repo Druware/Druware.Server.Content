@@ -98,6 +98,13 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("repo_github")
             .HasMaxLength(278);
 
+        entity.Property(e => e.IsDisabled)
+            .HasColumnName("is_disabled");
+
+        entity.Property(e => e.RedirectTo)
+            .HasColumnName("redirect_to")
+            .HasMaxLength(Product.RedirectToMaxLength);
+
         // configure additional index settings
         entity.HasIndex(u => u.Short)
             .IsUnique();

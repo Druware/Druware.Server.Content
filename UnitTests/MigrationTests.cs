@@ -8,6 +8,7 @@ public class MigrationTests
     public void AllSqliteMigrationsApplyToAnEmptyDatabase()
     {
         using var database = new SqliteDatabase();
+        database.CreateServerSchema();
         using var context = database.CreateContentContext();
 
         var all = context.Database.GetMigrations().ToList();
@@ -20,6 +21,7 @@ public class MigrationTests
         Assert.Contains(all, m => m.EndsWith("_SiteSettings"));
         Assert.Contains(all, m => m.EndsWith("_ArticleTakesAndMeta"));
         Assert.Contains(all, m => m.EndsWith("_Reviews"));
+        Assert.Contains(all, m => m.EndsWith("_ProductDisableRedirect"));
     }
 
     [Fact]

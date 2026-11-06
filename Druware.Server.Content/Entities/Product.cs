@@ -50,6 +50,27 @@ public partial class Product
     public string? DirectKde { get; set; } = null;
     public string? DirectHaiku { get; set; } = null;
     public string? RepoGithub { get; set; } = null;
+
+    /// <summary>
+    /// A disabled product is hidden from everyone but product authors,
+    /// product editors and system administrators.
+    /// </summary>
+    public bool IsDisabled { get; set; } = false;
+
+    /// <summary>
+    /// Where a moved or renamed product now lives: another product's short
+    /// or id, or an absolute http or https URL. Null when it has not moved.
+    /// </summary>
+    public string? RedirectTo { get; set; } = null;
+
+    /// <summary>
+    /// The current short of the product RedirectTo names, filled in by
+    /// ResolveRedirect, so a client can build the new address without a
+    /// second call. Null when RedirectTo is null, is a URL, or names a
+    /// product that no longer exists.
+    /// </summary>
+    [NotMapped]
+    public string? RedirectShort { get; set; } = null;
 	
     // public ICollection<Asset>? Assets { get; set; } = null;
 
@@ -161,5 +182,61 @@ public partial class Product
         ContentContext context,
         string lookup) =>
         ByShortOrId(context, lookup) == null;
-    
+
+    public const int RedirectToMaxLength = 2048;
+
+    /// <summary>
+    /// Trims a redirect and turns a blank one into null.
+    /// </summary>
+    public static string? NormalizeRedirectTo(string? redirectTo) =>
+        string.IsNullOrWhiteSpace(redirectTo) ? null : redirectTo.Trim();
+
+    private static bool IsWebAddress(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var url) &&
+        (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps);
+
+    /// <summary>
+    /// Checks a product's normalized RedirectTo: it must be null, an
+    /// absolute http or https URL, or the short or id of another existing
+    /// product. Returns the problem as a short sentence for a 400 response,
+    /// or null.
+    /// </summary>
+    /// <param name="context">The context to look the target up in</param>
+    /// <param name="product">The product as submitted, for its RedirectTo
+    /// and its (new) Short</param>
+    /// <param name="productId">The stored product's id on an update, null
+    /// on a create</param>
+    public static string? ValidateRedirectTo(
+        ContentContext context,
+        Product product,
+        long? productId = null)
+    {
+        var redirectTo = product.RedirectTo;
+        if (redirectTo == null) return null;
+
+        if (redirectTo.Length > RedirectToMaxLength)
+            return $"Redirect must be at most {RedirectToMaxLength} characters";
+        if (IsWebAddress(redirectTo)) return null;
+
+        if (redirectTo == product.Short)
+            return "A product cannot redirect to itself";
+        var target = ByShortOrId(context, redirectTo);
+        if (target == null)
+            return "Redirect must be an existing product's short or id, or a full http or https address";
+        if (productId != null && target.ProductId == productId)
+            return "A product cannot redirect to itself";
+        return null;
+    }
+
+    /// <summary>
+    /// Fills in RedirectShort when RedirectTo names a product that exists.
+    /// Only one step is followed; the target's own redirect is not.
+    /// </summary>
+    public static void ResolveRedirect(ContentContext context, Product product)
+    {
+        product.RedirectShort = null;
+        if (product.RedirectTo == null || IsWebAddress(product.RedirectTo))
+            return;
+        product.RedirectShort = ByShortOrId(context, product.RedirectTo)?.Short;
+    }
 }

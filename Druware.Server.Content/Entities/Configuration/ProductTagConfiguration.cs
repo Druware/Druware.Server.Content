@@ -24,7 +24,7 @@ public class ProductTagConfiguration : IEntityTypeConfiguration<ProductTag>
         entity.HasOne(d => d.Product)
             .WithMany(p => p.ProductTags)
             .HasForeignKey(d => d.ProductId)
-            .OnDelete(DeleteBehavior.ClientCascade)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("fk_producttags_productid__product_productid");
     }
 }

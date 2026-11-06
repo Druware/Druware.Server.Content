@@ -30,7 +30,7 @@ public class CollectionProductConfiguration : IEntityTypeConfiguration<Collectio
         entity.HasOne(d => d.Product)
             .WithMany(p => p.CollectionProducts)
             .HasForeignKey(d => d.ProductId)
-            .OnDelete(DeleteBehavior.ClientCascade)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("fk_collectionproducts_productid__product_productid");
 
         entity.HasIndex(e => new { e.CollectionId, e.ProductId })
